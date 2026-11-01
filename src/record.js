@@ -9,13 +9,20 @@ const { renderWav } = require("./audio");
 const { fill } = require("./meta");
 const D = require("./data");
 
+// Keeps the game inside YouTube Shorts\' safe zone so the Shorts interface (title, channel, buttons) never covers it:
+// ~110px top, ~420px bottom, ~120px right on the 1080x1920 frame (this page is 540x960, so values are halved).
+const SAFE_CSS = `
+body.shorts #app{box-sizing:border-box;padding-top:56px !important;padding-bottom:210px !important}
+body.shorts #field{width:min(440px,90vw) !important;left:-24px}
+`;
 const FX_CSS = `
 .fx{position:fixed;left:50%;transform:translateX(-50%);width:max-content;z-index:9000;pointer-events:none;text-align:center;font-family:'Baloo 2','Nunito','Segoe UI',sans-serif;font-weight:800;line-height:1.12;max-width:500px;animation:fxPop .38s cubic-bezier(.2,.9,.3,1.4) both, fxPulse 1.1s .4s ease-in-out infinite alternate}
 .fx.out{animation:fxOut .35s ease-in forwards}
 #fxHook{top:112px;font-size:40px}
 #fxCta{top:112px;font-size:36px}
-#fxBio{bottom:150px;font-size:27px;white-space:nowrap}
-.fx.bio{background:#1f8f3a;color:#fff;border:4px solid #fff;border-radius:30px;padding:10px 22px;box-shadow:0 6px 0 #0d4a1e;text-shadow:0 2px 0 #0d4a1e}
+#fxBio{bottom:215px;left:calc(50% - 24px);font-size:24px;max-width:420px;white-space:normal}
+#fxBio.big{font-size:30px}
+.fx.bio{background:#1f8f3a;color:#fff;border:4px solid #fff;border-radius:30px;padding:10px 18px;box-shadow:0 6px 0 #0d4a1e;text-shadow:0 2px 0 #0d4a1e}
 .fx.pill{background:#3a2717;color:#f6ecd2;border:4px solid #e8b93f;border-radius:30px;padding:12px 24px;box-shadow:0 6px 0 #1c1208}
 .fx.sticker{color:#fff04a;font-size:46px;transform:translateX(-50%) rotate(-3deg);text-shadow:-3px -3px 0 #1c1208,3px -3px 0 #1c1208,-3px 3px 0 #1c1208,3px 3px 0 #1c1208,0 6px 0 #1c1208}
 .fx.neon{color:#fff;background:rgba(0,0,0,.5);border-radius:26px;padding:10px 22px;text-shadow:0 0 8px #00e5ff,0 0 22px #00e5ff;border:3px solid #00e5ff;box-shadow:0 0 18px #00e5ff}
@@ -57,7 +64,7 @@ async function playAndRecord(plan, cfg, framesDir) {
 
   const page = await ctx.newPage();
   await page.goto(gameUrl);
-  await page.addStyleTag({ content: FX_CSS });
+  await page.addStyleTag({ content: FX_CSS + (cfg.safeZone === false ? "" : SAFE_CSS) });
   await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
   await page.waitForTimeout(600);
   const timeOrigin = await page.evaluate(() => performance.timeOrigin);
@@ -75,7 +82,7 @@ async function playAndRecord(plan, cfg, framesDir) {
 
   const vars = { time: plan.time, rush: plan.bot.rush ? plan.bot.rush.sec : 8 };
   await page.click("#startBtn");
-  await showText(page, "fxBio", cfg.bioText || "🎮 Play FREE — link in bio 🔗", "bio", 0);
+  await showText(page, "fxBio", plan.bioTpl || cfg.bioText || "🎮 Play FREE — link in bio 🔗", "bio", 0);
   await showText(page, "fxHook", fill(plan.hookTpl, vars), plan.hookStyle, 3900);
   await page.evaluate(botMain, plan.bot);
 
@@ -83,6 +90,7 @@ async function playAndRecord(plan, cfg, framesDir) {
   const mid = await page.evaluate(() => ({ score: window.__game.score }));
   const target = Math.max(10, Math.round((mid.score + 8) / 5) * 5);
   await showText(page, "fxCta", fill(plan.ctaTpl, { score: mid.score, target }), plan.ctaStyle, 0);
+  await showText(page, "fxBio", plan.bioEndTpl || plan.bioTpl || cfg.bioText, "bio big", 0);   // bigger, re-animated link-in-bio call at the end
   const usedMs = await page.evaluate(() => { const c = window.__LOG.find((e) => e.k === "count"); return c ? performance.now() - c.t + 60 : 0; });
   const tailMs = Math.max((cfg.tailSeconds || 2.5) * 1000, (cfg.videoSeconds || 20) * 1000 - usedMs);
   await page.waitForTimeout(tailMs);

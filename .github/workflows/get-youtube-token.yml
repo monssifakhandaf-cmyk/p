@@ -1,0 +1,25 @@
+name: Get YouTube token (one time)
+
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "The code= value copied from the address bar after Google approval"
+        required: true
+
+jobs:
+  token:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Exchange code and send the refresh token to Telegram
+        env:
+          AUTH_CODE: ${{ inputs.code }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/exchange-code.js

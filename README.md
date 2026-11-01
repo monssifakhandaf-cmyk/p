@@ -43,16 +43,25 @@ node factory.js report                  # تقرير التنوع
 - `game/` نسخة اللعبة (فيها الثيمات وخيارات `time=` و`theme=` ووضع `shorts`). ارفعها لموقعك كما هي.
 - `src/` الكود: `planner.js` (منع التكرار)، `bot.js` (اللاعب الآلي)، `record.js` (التسجيل)، `audio.js` (الصوت)، `meta.js` (العناوين).
 
-## التشغيل التلقائي على GitHub (فيديو كل يومين → تيليجرام)
-1. أنشئ مستودعًا جديدًا على GitHub وارفع **محتويات هذا المجلد** إلى جذر المستودع (يجب أن يكون المجلد `.github` في الجذر).
-2. أنشئ بوتًا من @BotFather وخذ التوكن، واحصل على معرّف الدردشة (Chat ID) من @userinfobot (وأرسل للبوت رسالة `/start` أولًا).
-3. من المستودع: **Settings → Secrets and variables → Actions → New repository secret**، وأضف:
-   - `TELEGRAM_BOT_TOKEN`
-   - `TELEGRAM_CHAT_ID`
-4. **Settings → Actions → General → Workflow permissions** اختر **Read and write permissions**.
-5. للتجربة الآن: تبويب **Actions → Make Short and send to Telegram → Run workflow**.
+## التشغيل التلقائي على GitHub (توليد → تيليجرام → يوتيوب)
+**الأسرار المطلوبة** (Settings → Secrets and variables → Actions → Secrets):
+`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `YT_REFRESH_TOKEN`
+(ملف `client_secret.json` موجود في المستودع، فلا حاجة لـ `YT_CLIENT_ID` و `YT_CLIENT_SECRET`؛ وإن أضفتهما كأسرار فلهما الأولوية.)
+(اختياريًا في تبويب Variables: `YT_PRIVACY` بقيمة `public` أو `unlisted` أو `private`).
 
-- التشغيل التلقائي يوميًا الساعة 12:00 UTC لكنه ينفّذ فعليًا **كل يومين** (غيّر الساعة من `cron` في `.github/workflows/make-short.yml`).
-- يُحفظ `data/history.json` تلقائيًا في المستودع حتى لا تتكرر الأفكار.
-- يصلك على تيليجرام الفيديو، ثم رسالة فيها العنوان والوصف والوسوم للنسخ إلى يوتيوب.
+**الخطوات**
+1. أنشئ مستودعًا جديدًا وارفع محتويات هذا المجلد إلى الجذر. المستودع يجب أن يبقى **خاصًا (Private)** لأنه يحتوي `client_secret.json`.
+2. Settings → Actions → General → Workflow permissions → **Read and write permissions**.
+3. أضف أسرار تيليجرام.
+4. احصل على `YT_REFRESH_TOKEN` مرة واحدة: افتح رابط الموافقة، ثم انسخ قيمة `code=` من شريط العنوان، ثم شغّل workflow **Get YouTube token** والصق الكود فيه. يصلك التوكن على تيليجرام فقط (لا يظهر في السجلات). احفظه كسر ثم احذف الرسالة.
+5. في Google Cloud → OAuth consent screen: انقل التطبيق من **Testing** إلى **In production** حتى لا ينتهي التوكن بعد 7 أيام.
+6. جرّب: Actions → **Make Short, send to Telegram and upload to YouTube** → Run workflow.
+
+**ملاحظات**
+- الجدول: 4 فيديوهات أسبوعيًا (الخميس والجمعة والسبت والأحد، ينشر قرابة 18:00 UTC). بعد 3–4 أسابيع افتح YouTube Studio → Analytics → Audience → «When your viewers are on YouTube» وعدّل `cron` في `.github/workflows/make-short.yml` ليناسب جمهورك.
+- المنطقة الآمنة: يضيّق المصنع اللعبة داخل الفيديو (أعلى ~110px، أسفل ~420px، يمين ~120px من 1080×1920) كي لا يغطيها عنوان القناة وأزرار الإعجاب. لتعطيلها ضع `"safeZone": false` في `config.json`.
+- يُرسل الفيديو إلى تيليجرام دائمًا أولًا (نسخة احتياطية)، ثم يُرفع إلى يوتيوب. إن فشل أحدهما يصلك تنبيه ويُحفظ السجل حتى لا يتكرر المحتوى.
+- إن لم تكن أسرار يوتيوب مضافة بعد، يتخطى المصنع الرفع ويكتفي بتيليجرام.
+- مشاريع جوجل الجديدة تُقفل فيديوهاتها على Private حتى يمر المشروع بتدقيق يوتيوب (نموذج API Services Audit and Quota Extension). حتى ذلك الحين ستصلك رسالة تنبيه وتنشر الفيديو بنقرة من YouTube Studio.
 - مدة الفيديو 20 ثانية: عدّاد 3 ثوانٍ + لعب 14 ثانية + ختام. (`config.json`: `gameSeconds`, `videoSeconds`)
+- المحتوى النصي (200+ عنوان، عشرات الأوصاف والوسوم) في `src/content_extra.js` و `src/data.js`، وتستطيع إضافة المزيد.

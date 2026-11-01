@@ -127,4 +127,21 @@ const DESC_QUESTIONS = [
 const HASHTAGS = ["#AntSmash", "#MiniGame", "#MobileGame", "#CasualGames", "#GamingShorts", "#Challenge", "#ReflexGame", "#SatisfyingGames", "#FreeGames", "#WhackAMole", "#GameShorts", "#TapGame", "#HighScore"];
 const TAG_POOL = ["ant smash", "ant smash game", "whack a mole", "whack an ant", "smash ants game", "mini game", "casual game", "mobile game", "browser game", "free online game", "free game", "addictive game", "tap game", "reflex game", "reaction game", "high score challenge", "can you beat my score", "gaming shorts", "shorts game", "play free games", "fun game", "time killer game", "satisfying game", "arcade game"];
 
-module.exports = { BIO_LINES, THEMES, HOOK_STYLES, BEST_MODES, CONCEPTS, COMMON_CTAS, DESC_INTROS, DESC_TIPS, DESC_QUESTIONS, HASHTAGS, TAG_POOL };
+// ---- merge the big extra pool (src/content_extra.js) into the library, ignoring duplicates ----
+const X = require("./content_extra");
+const uniq = (a, b) => Array.from(new Set((a || []).concat(b || [])));
+for (const id of Object.keys(CONCEPTS)) {
+  const ex = X.concepts[id]; if (!ex) continue;
+  const C = CONCEPTS[id];
+  C.hooks = uniq(C.hooks, ex.hooks); C.titles = uniq(C.titles, ex.titles); C.desc = uniq(C.desc, ex.desc); C.tags = uniq(C.tags, ex.tags);
+  if (ex.ctas) C.ctas = uniq(C.ctas, ex.ctas);
+}
+const COMMON_CTAS2 = uniq(COMMON_CTAS, X.COMMON_CTAS);
+const BIO_LINES2 = uniq(BIO_LINES, X.BIO_LINES);
+const DESC_INTROS2 = uniq(DESC_INTROS, X.DESC_INTROS);
+const DESC_TIPS2 = uniq(DESC_TIPS, X.DESC_TIPS);
+const DESC_QUESTIONS2 = uniq(DESC_QUESTIONS, X.DESC_QUESTIONS);
+const HASHTAGS2 = uniq(HASHTAGS, X.HASHTAGS);
+const TAG_POOL2 = uniq(TAG_POOL, X.TAG_POOL);
+
+module.exports = { BIO_BADGES: X.BIO_BADGES, BIO_END: X.BIO_END, BIO_LINES: BIO_LINES2, THEMES, HOOK_STYLES, BEST_MODES, CONCEPTS, COMMON_CTAS: COMMON_CTAS2, DESC_INTROS: DESC_INTROS2, DESC_TIPS: DESC_TIPS2, DESC_QUESTIONS: DESC_QUESTIONS2, HASHTAGS: HASHTAGS2, TAG_POOL: TAG_POOL2 };

@@ -1,0 +1,59 @@
+name: Make Short, send to Telegram and upload to YouTube
+
+on:
+  schedule:
+    - cron: "30 17 * * 4,5,6,0"   # 4 videos a week: Thu, Fri, Sat, Sun. Runs 17:30 UTC, so it is live around 17:40-18:00 UTC (evening in Europe/Arab world, afternoon in the US)
+  workflow_dispatch:           # manual run button (always runs)
+
+permissions:
+  contents: write              # needed to save data/history.json (anti-repetition memory)
+
+concurrency:
+  group: make-short
+  cancel-in-progress: false
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install ffmpeg + emoji font
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-noto-color-emoji
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Make the video, send to Telegram, upload to YouTube
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_PRIVACY: ${{ vars.YT_PRIVACY }}
+        run: node factory.js make --count 1 --send --upload
+
+      - name: Save history (so the next video is different)
+        if: always()
+        run: |
+          git config user.name "shorts-bot"
+          git config user.email "shorts-bot@users.noreply.github.com"
+          git add data/history.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "chore: update history" && git push)
+
+      - name: Keep a copy of the video (14 days)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: short-${{ github.run_number }}
+          path: out/*.mp4
+          retention-days: 14
+          if-no-files-found: ignore

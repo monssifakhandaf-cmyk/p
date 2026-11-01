@@ -20,5 +20,11 @@
   "bioText": "🎮 Play FREE — link in bio 🔗",
   "crf": 20,
   "maxrate": "8M",
-  "bufsize": "16M"
+  "bufsize": "16M",
+  "youtube": {
+    "categoryId": "20",
+    "privacy": "public",
+    "language": "en"
+  },
+  "safeZone": true
 }

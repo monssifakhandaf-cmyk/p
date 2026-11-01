@@ -39,4 +39,15 @@ async function sendVideo(file, meta, dims = {}) {
   await call(token, "sendMessage", msg);
 }
 
-module.exports = { sendVideo };
+async function sendText(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chat = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chat) throw new Error("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID.");
+  const msg = new FormData();
+  msg.append("chat_id", chat);
+  msg.append("text", String(text).slice(0, 4000));
+  msg.append("disable_web_page_preview", "true");
+  await call(token, "sendMessage", msg);
+}
+
+module.exports = { sendVideo, sendText };

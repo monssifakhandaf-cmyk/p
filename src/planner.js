@@ -59,6 +59,10 @@ function planOne(history, planned, opts = {}) {
   const ctaStyle = lruPick(D.HOOK_STYLES, col((e) => e.ctaStyle), [hookStyle]);
   const ctaTpl = lruPick(C.ctas || D.COMMON_CTAS, col((e) => e.ctaTpl));
 
+  // 3b) "link in bio" texts: small badge during play + bigger one at the end, both rotating.
+  const bioTpl = lruPick(D.BIO_BADGES, col((e) => e.bioTpl));
+  const bioEndTpl = lruPick(D.BIO_END, col((e) => e.bioEndTpl));
+
   // 4) Music: style rotates, key and tempo must differ from recent videos.
   const style = lruPick(MUSIC_STYLES, col((e) => e.music && e.music.style));
   const [t0, t1] = MUSIC[style].tempo;
@@ -86,7 +90,7 @@ function planOne(history, planned, opts = {}) {
   const bestMode = Math.random() < 0.55 ? "fresh" : "chase";
   return {
     concept, theme, seed, time: cfg.gameSeconds || 14,   // fixed round length so the whole video lands on ~20s
-    hookTpl, hookStyle, ctaTpl, ctaStyle, music, bot,
+    hookTpl, hookStyle, ctaTpl, ctaStyle, bioTpl, bioEndTpl, music, bot,
     bestMode, bestSeed: bestMode === "fresh" ? 0 : randInt(40, 400)
   };
 }

@@ -3,7 +3,7 @@
 /*
   Ant Smash Shorts Factory
     node factory.js make --count 5          make 5 varied, ready-to-upload videos
-    node factory.js make --send             make 1 video and send it to Telegram (needs TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)
+    node factory.js make --send --upload    make 1 video, send it to Telegram and upload it to YouTube
     node factory.js make --concept bee_fail make one video of a specific concept
     node factory.js plan --count 5          show what would be made (no recording)
     node factory.js report                  variety report of everything made so far
@@ -15,7 +15,8 @@ const planner = require("./src/planner");
 const { buildMeta } = require("./src/meta");
 const { playAndRecord, finalize } = require("./src/record");
 const D = require("./src/data");
-const { sendVideo } = require("./src/telegram");
+const { sendVideo, sendText } = require("./src/telegram");
+const yt = require("./src/youtube");
 
 const args = process.argv.slice(2);
 const cmd = args[0] || "help";
@@ -37,7 +38,7 @@ async function make() {
 
   const today = new Date().toISOString().slice(0, 10);
   const todayCount = history.filter((e) => String(e.createdAt).slice(0, 10) === today).length;
-  if (!has("send") && todayCount + count > cfg.maxPerDay) console.log(`⚠️  Heads-up: that would be ${todayCount + count} videos today. Upload them spread over several days (see README).`);
+  if (!has("send") && !has("upload") && todayCount + count > cfg.maxPerDay) console.log(`⚠️  Heads-up: that would be ${todayCount + count} videos today. Upload them spread over several days (see README).`);
 
   const sheet = path.join(outDir, "upload_sheet.csv");
   if (!fs.existsSync(sheet)) fs.writeFileSync(sheet, "id,file,title,description,tags,concept,score\n");
@@ -69,16 +70,41 @@ async function make() {
 
       const entry = {
         id, createdAt: new Date().toISOString(), file, concept: plan.concept, theme: plan.theme, seed: plan.seed, time: plan.time,
-        hookTpl: plan.hookTpl, hookStyle: plan.hookStyle, ctaTpl: plan.ctaTpl, ctaStyle: plan.ctaStyle, music: plan.music,
+        hookTpl: plan.hookTpl, hookStyle: plan.hookStyle, bioTpl: plan.bioTpl, bioEndTpl: plan.bioEndTpl, ctaTpl: plan.ctaTpl, ctaStyle: plan.ctaStyle, music: plan.music,
         bestMode: plan.bestMode, title: meta.title, titleTpl: meta.titleTpl, descIntro: meta.descIntro, descTips: meta.descTips,
         descQuestion: meta.descQuestion, bioLine: meta.bioLine, hashtags: meta.hashtags, tags: meta.tags,
         result: { score: result.score, bestMult: result.bestMult, smashed: result.smashed, taps: result.taps, counts: result.counts }
       };
+      // ---- delivery: Telegram first (always keeps a copy), then YouTube. Each one is independent. ----
+      const errors = [];
+      let delivered = false;
       if (has("send")) {
-        console.log("   📨 sending to Telegram...");
-        await sendVideo(path.join(outDir, file), meta, { width: cfg.outputSize.width, height: cfg.outputSize.height, duration: Math.round(info.duration) });
-        console.log("   ✓ sent");
+        try {
+          console.log("   📨 sending to Telegram...");
+          await sendVideo(path.join(outDir, file), meta, { width: cfg.outputSize.width, height: cfg.outputSize.height, duration: Math.round(info.duration) });
+          console.log("   ✓ sent to Telegram"); delivered = true;
+        } catch (e) { console.log("   ✗ Telegram: " + e.message); errors.push("Telegram: " + e.message); }
       }
+      if (has("upload")) {
+        if (!yt.configured()) {
+          console.log("   ⏭️  YouTube not configured yet (missing YT_* secrets): skipping upload.");
+        } else {
+          try {
+            console.log("   ▶️  uploading to YouTube...");
+            const up = await yt.uploadVideo(path.join(outDir, file), meta, cfg.youtube || {});
+            entry.youtube = { id: up.id, privacy: up.privacy };
+            console.log(`   ✓ YouTube: ${up.url} (${up.privacy})`); delivered = true;
+            const locked = up.requestedPrivacy !== up.privacy;
+            const note = `▶️ Uploaded to YouTube\n${up.url}\nStatus: ${up.privacy}` + (locked ? "\n⚠️ YouTube kept it " + up.privacy + " (the API project probably has not passed the audit yet). Publish it from YouTube Studio, or request the audit." : "");
+            if (has("send")) await sendText(note).catch(() => {});
+          } catch (e) {
+            console.log("   ✗ YouTube: " + e.message); errors.push("YouTube: " + e.message);
+            if (has("send")) await sendText("⚠️ YouTube upload failed for " + file + ":\n" + e.message).catch(() => {});
+          }
+        }
+      }
+      if (errors.length) process.exitCode = 1;   // the run is marked failed, but the history below is still saved
+      if ((has("send") || has("upload")) && !delivered) throw new Error("Nothing was delivered: " + errors.join(" | "));
       history.push(entry);
       planner.saveHistory(historyFile, history);
       fs.writeFileSync(path.join(outDir, `${id}_${plan.concept}.txt`),

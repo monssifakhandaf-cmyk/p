@@ -33,7 +33,7 @@ function buildMeta(plan, result, history) {
   const hashUsed = used((e) => e.hashtags || []).flat();
   const hashtags = ["#Shorts"].concat(D.HASHTAGS.slice().sort((a, b) => hashUsed.lastIndexOf(a) - hashUsed.lastIndexOf(b)).slice(0, 4));
   const bioLine = lruPick(D.BIO_LINES, used((e) => e.bioLine));
-  const description = [intro, "", conceptLine, "", shuffle(tips).join("\n"), "", question, "", bioLine, "", hashtags.join(" ")].join("\n");
+  const description = [bioLine, "", intro, "", conceptLine, "", shuffle(tips).join("\n"), "", question, "", hashtags.join(" ")].join("\n");
 
   // ----- tags (YouTube allows ~500 characters) -----
   const tagUsed = used((e) => e.tags || []).flat();
