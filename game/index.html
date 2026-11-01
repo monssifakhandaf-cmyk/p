@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Ant Smash — Garden Edition</title>
+<meta name="description" content="Ant Smash: whack the ants before they dodge back into their holes, dodge the bees, grab power-ups and chase your best score!">
+<meta name="theme-color" content="#3a2717">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ant Smash">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-dark:#3a2717;
+    --soil:#5a3d22;
+    --soil-light:#8a6a3f;
+    --grass-dark:#2f5024;
+    --grass:#4c7a3a;
+    --grass-light:#6aa652;
+    --gold:#e8b93f;
+    --gold-deep:#b8860f;
+    --cream:#f6ecd2;
+    --ink:#221708;
+    --danger:#c0392b;
+    --sky-top:#bfe3f7;
+    --sky-bot:#d9efc4;
+    --blue:#3f7fb0;
+    --vh:1vh;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    overscroll-behavior:none; overflow:hidden;
+    font-family:'Nunito','Segoe UI',sans-serif;
+    touch-action:manipulation;
+  }
+  body{
+    height:calc(var(--vh, 1vh) * 100);
+    background:linear-gradient(var(--sky-top), var(--sky-bot) 40%, var(--grass) 44%, var(--grass-dark) 100%);
+  }
+  h1,h2,#hud .num,.bigScore,.actionBtn,#banner,#countdown{ font-family:'Baloo 2','Nunito',sans-serif; }
+  svg.icon{ width:1em; height:1em; display:inline-block; vertical-align:-0.15em; flex-shrink:0; }
+  button{ font-family:inherit; }
+  button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+
+  #app{
+    position:relative; width:100%; height:100%;
+    display:flex; flex-direction:column; align-items:center;
+    padding-top:calc(env(safe-area-inset-top) + 8px);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+
+  /* ---------- HUD ---------- */
+  #hud{
+    width:100%; max-width:640px;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 clamp(10px,4vw,20px); gap:8px; z-index:20; flex-shrink:0;
+  }
+  .pill{
+    background:var(--soil-dark); color:var(--cream);
+    padding:clamp(6px,1.6vh,9px) clamp(10px,3vw,15px); border-radius:999px;
+    font-weight:700; font-size:clamp(13px,3.6vw,16px);
+    box-shadow:0 3px 0 #1c1208, inset 0 1px 0 rgba(255,255,255,.08);
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
+    transition:background .2s, transform .12s;
+  }
+  .pill .num{ color:var(--gold); font-size:1.15em; font-weight:800; min-width:1ch; direction:ltr; unicode-bidi:isolate; }
+  .pill small{ font-size:.72em; color:#cdbd93; font-weight:700; }
+  .pill svg.icon{ font-size:1.1em; }
+  #comboPill.pop{ transform:scale(1.25); }
+  #timePill.low{ background:#8f2a1e; animation:lowPulse .5s ease-in-out infinite alternate; }
+  #timePill.low .num{ color:#fff; }
+  @keyframes lowPulse{ to{ transform:scale(1.08); } }
+  body.frenzy #comboPill{ background:#b4501a; }
+
+  #barRow{
+    width:min(92vw,600px); display:flex; align-items:center; gap:10px;
+    margin:clamp(6px,1.6vh,10px) 0; flex-shrink:0; z-index:20;
+  }
+  #timerBar{ flex:1; height:8px; border-radius:6px; background:rgba(0,0,0,.25); overflow:hidden; }
+  #timerFill{ height:100%; background:linear-gradient(90deg,var(--gold),#f3d27a); width:100%; }
+  body.frenzy #timerFill{ background:linear-gradient(90deg,#ff7a3d,#ffd36a); }
+  .roundBtn{
+    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
+    background:var(--soil-dark); color:var(--cream); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 0 #1c1208; transition:transform .08s, opacity .2s;
+  }
+  .roundBtn:active{ transform:translateY(2px); box-shadow:0 1px 0 #1c1208; }
+  .roundBtn:disabled{ opacity:.4; cursor:default; }
+  .roundBtn svg{ width:18px; height:18px; }
+  #soundBtn .off{ display:none; }
+  #soundBtn.muted .on{ display:none; }
+  #soundBtn.muted .off{ display:block; }
+
+  /* ---------- Field ---------- */
+  #fieldWrap{ flex:1 1 auto; width:100%; display:flex; align-items:center; justify-content:center; min-height:0; padding:4px 12px; }
+  #field{
+    position:relative;
+    width:min(92vw, 92vh, 540px);
+    aspect-ratio:1/1;
+    background:radial-gradient(ellipse at 50% 12%, rgba(255,255,255,.15), transparent 55%),
+      linear-gradient(var(--soil-light), var(--soil) 55%, var(--soil-dark));
+    border-radius:5%;
+    box-shadow:0 10px 0 #1c1208, 0 16px 28px rgba(0,0,0,.35);
+    display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+    gap:5%; padding:6.5%;
+    transition:box-shadow .3s;
+  }
+  body.frenzy #field{ box-shadow:0 10px 0 #1c1208, 0 0 0 4px #ff9a3d, 0 0 34px 6px rgba(255,150,50,.65); }
+  #field.shake{ animation:shake .35s; }
+  @keyframes shake{
+    0%,100%{ transform:translate(0,0); }
+    20%{ transform:translate(-7px,3px) rotate(-.6deg); }
+    40%{ transform:translate(6px,-4px) rotate(.5deg); }
+    60%{ transform:translate(-5px,2px); }
+    80%{ transform:translate(3px,-2px); }
+  }
+  #field::before{
+    content:""; position:absolute; inset:0; pointer-events:none; border-radius:5%;
+    background-image:
+      radial-gradient(circle at 8% 92%, rgba(0,0,0,.25) 0 3%, transparent 3.5%),
+      radial-gradient(circle at 92% 90%, rgba(0,0,0,.25) 0 2.5%, transparent 3%),
+      radial-gradient(circle at 85% 8%, rgba(255,255,255,.08) 0 2%, transparent 2.5%);
+  }
+
+  .hole{
+    position:relative; border-radius:50%;
+    background:radial-gradient(ellipse at 50% 40%, #241708 0%, var(--soil-dark) 55%, var(--soil) 100%);
+    box-shadow:inset 0 6px 10px rgba(0,0,0,.7), inset 0 -3px 0 rgba(255,255,255,.05);
+    overflow:hidden; cursor:pointer; touch-action:none;
+  }
+  .critter{
+    position:absolute; left:50%; bottom:-100%; width:52%; transform:translateX(-50%);
+    transition:bottom .16s cubic-bezier(.2,.9,.3,1.3);
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.6)) drop-shadow(0 0 3px rgba(246,236,210,.35));
+    will-change:bottom;
+  }
+  .hole.up .critter{ bottom:14%; }
+  .hole.dodging .critter{ transition:bottom .45s ease-in; }
+  .critter svg{ width:100%; display:block; overflow:visible; }
+  .hole.smashed .critter{ animation:smashSquish .28s ease-out forwards; }
+  @keyframes smashSquish{
+    0%{ transform:translateX(-50%) scaleY(1) scaleX(1); }
+    40%{ transform:translateX(-50%) scaleY(.25) scaleX(1.35); }
+    100%{ transform:translateX(-50%) scaleY(.15) scaleX(1.5); opacity:0; }
+  }
+  .legs{ transform-box:view-box; transform-origin:50px 65px; animation:wiggle .14s ease-in-out infinite alternate; }
+  @keyframes wiggle{ from{ transform:rotate(-4deg); } to{ transform:rotate(4deg); } }
+  .wing{ transform-box:fill-box; transform-origin:50% 100%; animation:flap .07s linear infinite alternate; }
+  @keyframes flap{ from{ transform:scaleY(1) rotate(0); } to{ transform:scaleY(.55) rotate(6deg); } }
+  .bob{ animation:bob .5s ease-in-out infinite alternate; }
+  @keyframes bob{ from{ transform:translateY(0); } to{ transform:translateY(-5px); } }
+  .shine{ animation:shine .6s ease-in-out infinite alternate; }
+  @keyframes shine{ from{ filter:brightness(1); } to{ filter:brightness(1.35); } }
+
+  .dust{
+    position:absolute; bottom:8%; left:50%; width:70%; height:35%; transform:translateX(-50%); border-radius:50%;
+    background:radial-gradient(circle, rgba(200,180,140,.9), transparent 70%); opacity:0; pointer-events:none;
+  }
+  .hole.smashed .dust, .hole.whiff .dust{ animation:dustPuff .35s ease-out forwards; }
+  @keyframes dustPuff{ 0%{ opacity:.9; transform:translateX(-50%) scale(.3); } 100%{ opacity:0; transform:translateX(-50%) scale(2.1); } }
+
+  .hammer{
+    position:absolute; left:50%; top:-6%; width:64%; pointer-events:none; opacity:0; z-index:6;
+    transform:translateX(-35%) rotate(-60deg); transform-origin:85% 90%;
+  }
+  .hole.smashed .hammer{ animation:swing .26s ease-out forwards; }
+  @keyframes swing{
+    0%{ opacity:1; transform:translateX(-35%) rotate(-70deg); }
+    55%{ opacity:1; transform:translateX(-35%) rotate(8deg); }
+    100%{ opacity:0; transform:translateX(-35%) rotate(8deg); }
+  }
+
+  .floatScore{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    font-weight:800; font-size:clamp(16px,4.5vw,22px); color:var(--gold); white-space:nowrap;
+    text-shadow:0 2px 0 #1c1208; pointer-events:none; animation:floatUp .75s ease-out forwards; z-index:30;
+    font-family:'Baloo 2','Nunito',sans-serif; direction:ltr; unicode-bidi:isolate;
+  }
+  .floatScore.bad{ color:#ff6b5b; }
+  .floatScore.good{ color:#8ee08a; }
+  @keyframes floatUp{ 0%{ opacity:1; top:35%; } 100%{ opacity:0; top:-15%; } }
+
+  .particle{
+    position:absolute; left:50%; top:55%; width:7%; aspect-ratio:1; border-radius:50%;
+    pointer-events:none; z-index:8; animation:burst .5s ease-out forwards;
+  }
+  @keyframes burst{
+    0%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+    100%{ opacity:0; transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.3); }
+  }
+
+  #banner{
+    position:absolute; left:50%; top:-3%; transform:translate(-50%,-100%) scale(.8);
+    background:#ff7a3d; color:#fff; padding:6px 18px; border-radius:999px; font-weight:800;
+    font-size:clamp(15px,4.4vw,20px); box-shadow:0 4px 0 #8a3a10; opacity:0; pointer-events:none; z-index:40;
+    transition:opacity .2s, transform .2s; white-space:nowrap;
+  }
+  #banner.show{ opacity:1; transform:translate(-50%,-110%) scale(1); }
+  #countdown{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:45;
+    pointer-events:none; font-size:clamp(80px,26vw,150px); font-weight:800; color:#fff;
+    text-shadow:0 6px 0 #1c1208, 0 0 30px rgba(0,0,0,.5);
+  }
+  #countdown span{ animation:countPop .8s ease-out forwards; }
+  @keyframes countPop{ 0%{ transform:scale(2.2); opacity:0; } 25%{ transform:scale(1); opacity:1; } 100%{ transform:scale(.85); opacity:.9; } }
+
+  /* ---------- Overlays ---------- */
+  .overlay{
+    position:absolute; inset:0; z-index:50;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:20px;
+    background:linear-gradient(rgba(20,12,4,.55), rgba(20,12,4,.78));
+    backdrop-filter:blur(2px); overflow-y:auto;
+  }
+  .card{
+    background:var(--cream); color:var(--ink);
+    padding:clamp(22px,5vw,30px) clamp(20px,5vw,28px); border-radius:22px;
+    max-width:420px; width:100%;
+    box-shadow:0 8px 0 #b89a63, 0 16px 30px rgba(0,0,0,.4);
+    border:4px solid var(--soil-dark); margin:auto;
+    animation:cardIn .35s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes cardIn{ from{ transform:translateY(24px) scale(.94); opacity:0; } }
+  .card h1{ margin:0 0 4px; font-size:clamp(24px,7vw,30px); color:var(--soil-dark); font-weight:800; letter-spacing:.5px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .card h2{ margin:0 0 14px; font-size:clamp(13px,3.6vw,15px); color:#7a6640; font-weight:600; }
+
+  .primaryActions{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+  .actionBtn{
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    padding:14px 20px; font-size:clamp(15px,4.2vw,17px); font-weight:700;
+    border:none; border-radius:14px; cursor:pointer; color:#fff;
+    transition:transform .08s;
+  }
+  .actionBtn:active{ transform:translateY(3px); }
+  .actionBtn.play{ background:var(--grass-dark); box-shadow:0 5px 0 #1c3a15; }
+  .actionBtn.play:active{ box-shadow:0 1px 0 #1c3a15; }
+  .actionBtn.install{ background:var(--blue); box-shadow:0 5px 0 #274f6b; }
+  .actionBtn.install:active{ box-shadow:0 1px 0 #274f6b; }
+  .actionBtn svg.icon{ font-size:1.2em; }
+
+  .bestLine{ font-size:clamp(13px,3.6vw,15px); color:var(--gold-deep); font-weight:800; margin:-4px 0 10px; }
+
+  .legend{ text-align:start; font-size:clamp(12.5px,3.4vw,14px); margin:10px 0; line-height:1.5; }
+  .legend div{ display:flex; align-items:center; gap:10px; padding:2px 0; }
+  .legend svg{ width:28px; height:28px; flex-shrink:0; overflow:visible; }
+  .legend .legs,.legend .wing,.legend .bob,.legend .shine{ animation:none; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    margin-top:10px; padding:14px 34px;
+    background:var(--grass-dark); color:#fff; font-size:clamp(16px,4.5vw,18px); font-weight:700; font-family:'Baloo 2','Nunito',sans-serif;
+    border:none; border-radius:999px; cursor:pointer; box-shadow:0 5px 0 #1c3a15; transition:transform .08s;
+  }
+  .btn:active{ transform:translateY(4px); box-shadow:0 1px 0 #1c3a15; }
+  .btn.secondary{ background:var(--soil); box-shadow:0 5px 0 #241a10; font-size:clamp(14px,4vw,15px); padding:11px 26px; }
+  .btn.secondary:active{ box-shadow:0 1px 0 #241a10; }
+
+  .bigScore{ font-size:clamp(38px,11vw,52px); font-weight:800; color:var(--gold-deep); margin:2px 0 6px; line-height:1.1; }
+  .stats{ display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; font-size:clamp(12px,3.4vw,14px); color:#7a6640; margin-bottom:8px; text-align:start; }
+  .stats div{ display:flex; justify-content:space-between; gap:6px; background:rgba(90,61,34,.08); padding:5px 10px; border-radius:10px; }
+  .stats b{ color:var(--soil-dark); }
+  .hidden{ display:none !important; }
+  .newBestBadge{ color:var(--gold-deep); font-weight:800; margin-bottom:6px; font-size:clamp(13px,3.6vw,15px); display:flex; align-items:center; justify-content:center; gap:6px; animation:badge .7s ease-in-out infinite alternate; }
+  @keyframes badge{ to{ transform:scale(1.1); } }
+  .endActions{ display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+
+  #offlineNotice{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(20,12,4,.92); color:var(--cream);
+    display:flex; align-items:center; justify-content:center; text-align:center; padding:24px;
+  }
+  #offlineNotice .box{ max-width:340px; }
+  #offlineNotice svg.icon{ font-size:44px; margin-bottom:10px; }
+  #offlineNotice h2{ color:var(--cream); font-size:19px; margin:0 0 6px; }
+  #offlineNotice p{ font-size:14px; color:#d8c9a3; margin:0; }
+
+  @media (max-height:640px){
+    .card{ padding:14px 18px; }
+    .card h1{ font-size:22px; margin-bottom:2px; }
+    .card h2{ margin-bottom:6px; }
+    .legend{ margin:6px 0; line-height:1.3; }
+    .legend svg{ width:22px; height:22px; }
+    .legend div{ gap:8px; padding:1px 0; }
+    .actionBtn{ padding:10px 16px; }
+    .primaryActions{ margin-bottom:8px; gap:7px; }
+  }
+  @media (max-height:560px){
+    #hud .pill{ padding:5px 10px; }
+    #barRow{ margin:5px 0; }
+    #field{ width:min(58vw, 84vh, 460px); }
+  }
+  @media (max-width:360px){ #hud{ gap:5px; } .pill{ padding:6px 9px; font-size:12px; } }
+  @media (min-width:900px){ #field{ width:min(48vw, 78vh, 560px); } }
+  /* ---------- Themes (?theme=night|candy|desert|lava|snow) ---------- */
+  body.theme-night{ --sky-top:#0f1b3d; --sky-bot:#2a4470; --grass:#24505a; --grass-dark:#12262e; --soil-light:#5a4d7c; --soil:#3b3350; --soil-dark:#201a38; }
+  body.theme-candy{ --sky-top:#ffcfe9; --sky-bot:#fff0c9; --grass:#ff8fc7; --grass-dark:#c2509a; --soil-light:#c98aa8; --soil:#9c5578; --soil-dark:#62304f; }
+  body.theme-desert{ --sky-top:#ffd59a; --sky-bot:#ffeec9; --grass:#dcae62; --grass-dark:#b0813a; --soil-light:#d8a966; --soil:#b0823f; --soil-dark:#6e4c22; }
+  body.theme-lava{ --sky-top:#2a0d0d; --sky-bot:#6a2216; --grass:#8a2f14; --grass-dark:#3d130a; --soil-light:#6b3a30; --soil:#46261f; --soil-dark:#1d0d0a; }
+  body.theme-snow{ --sky-top:#cfe8ff; --sky-bot:#f2f9ff; --grass:#e4eef5; --grass-dark:#a3bccf; --soil-light:#a3b8cf; --soil:#74899f; --soil-dark:#46586d; }
+
+  /* ---------- Ads ---------- */
+  .adSlot{ margin:14px auto 0; display:flex; justify-content:center; align-items:center; max-width:100%; overflow:hidden; border-radius:8px; }
+  .adSlot iframe{ border:0; max-width:100%; display:block; }
+  .adLabel{ font-size:10px; letter-spacing:1px; color:#a8956a; text-transform:uppercase; margin-top:8px; }
+
+  /* ---------- Hype / Shorts ---------- */
+  #callout{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:44; pointer-events:none;
+    font-family:'Baloo 2','Nunito',sans-serif; font-weight:800; font-size:clamp(30px,10vw,60px); color:#fff; white-space:nowrap;
+    text-shadow:0 4px 0 #1c1208, 0 0 24px rgba(255,170,40,.9); opacity:0;
+  }
+  #callout.show{ animation:callout .85s ease-out forwards; }
+  @keyframes callout{
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(.4) rotate(-6deg); }
+    20%{ opacity:1; transform:translate(-50%,-50%) scale(1.15) rotate(2deg); }
+    70%{ opacity:1; transform:translate(-50%,-60%) scale(1); }
+    100%{ opacity:0; transform:translate(-50%,-90%) scale(1); }
+  }
+  #flash{ position:fixed; inset:0; pointer-events:none; z-index:60; opacity:0; background:radial-gradient(circle,rgba(255,220,120,.55),transparent 70%); }
+  #flash.on{ animation:flash .4s ease-out; }
+  @keyframes flash{ 0%{opacity:.9} 100%{opacity:0} }
+  .confetti{ position:fixed; top:-12px; width:10px; height:14px; z-index:70; pointer-events:none; animation:fall linear forwards; }
+  @keyframes fall{ to{ transform:translateY(105vh) rotate(720deg); opacity:.9; } }
+  #watermark{
+    position:fixed; left:0; right:0; bottom:calc(env(safe-area-inset-bottom) + 10px); text-align:center; z-index:30; pointer-events:none;
+    font-family:'Baloo 2','Nunito',sans-serif; font-weight:800; color:#fff; font-size:clamp(14px,4vw,18px);
+    text-shadow:0 2px 0 #1c1208, 0 0 12px rgba(0,0,0,.5); display:none;
+  }
+  body.shorts #watermark{ display:block; }
+  body.shorts .adSlot, body.shorts .adLabel, body.shorts #installBtn, body.shorts #shareBtnStart, body.shorts #shareBtnEnd{ display:none !important; }
+  body.shorts #field{ width:min(94vw, 62vh, 560px); }
+
+  @media (prefers-reduced-motion:reduce){
+    #field.shake, #callout.show, .legs, .wing, .bob, .shine, .newBestBadge, #timePill.low{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="hud">
+    <div class="pill" aria-live="off">
+      <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7L2 9.2l7.1-.6L12 2z" fill="#e8b93f" stroke="#1c1208" stroke-width="1"/></svg>
+      <span class="num" id="scoreVal">0</span>
+    </div>
+    <div class="pill" id="comboPill">
+      <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 2c1 3-2 4-2 7a3 3 0 006 0c0-1-.5-2-1-2.5 2 .5 4 3 4 6.5a7 7 0 11-14 0c0-4.5 3-6.5 5-9.5.5-.8 1.3-1.2 2-1.5z" fill="#ff7a3d" stroke="#1c1208" stroke-width="1"/></svg>
+      <span class="num" id="comboVal">×1</span><small id="streakVal">0</small>
+    </div>
+    <div class="pill" id="timePill">
+      <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" fill="#f6ecd2" stroke="#1c1208" stroke-width="1.5"/><path d="M12 8v5l3.5 2" stroke="#1c1208" stroke-width="1.6" stroke-linecap="round"/><path d="M9 2h6" stroke="#1c1208" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span class="num" id="timeVal">60</span>
+    </div>
+  </div>
+
+  <div id="barRow">
+    <button class="roundBtn" id="pauseBtn" aria-label="Pause" disabled>
+      <svg viewBox="0 0 24 24" fill="#f6ecd2"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+    </button>
+    <div id="timerBar"><div id="timerFill"></div></div>
+    <button class="roundBtn" id="soundBtn" aria-label="Sound">
+      <svg class="on" viewBox="0 0 24 24" fill="none" stroke="#f6ecd2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="#f6ecd2"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>
+      <svg class="off" viewBox="0 0 24 24" fill="none" stroke="#f6ecd2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="#f6ecd2"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+    </button>
+  </div>
+
+  <div id="fieldWrap">
+    <div id="field">
+      <div id="banner"></div>
+      <div id="callout"></div>
+      <div id="countdown" class="hidden"></div>
+    </div>
+  </div>
+
+  <!-- Start screen -->
+  <div class="overlay" id="startScreen">
+    <div class="card">
+      <h1><svg class="icon" viewBox="0 0 100 120" style="width:.9em;height:.9em"><ellipse cx="50" cy="88" rx="17" ry="20" fill="#4a2f1a"/><ellipse cx="50" cy="58" rx="12" ry="14" fill="#4a2f1a"/><ellipse cx="50" cy="30" rx="9" ry="10" fill="#4a2f1a"/></svg><span id="t_title">Ant Smash</span></h1>
+      <h2 id="t_subtitle">Garden Edition</h2>
+      <div class="bestLine hidden" id="startBest"></div>
+
+      <div class="primaryActions">
+        <button class="actionBtn play" id="startBtn">
+          <svg class="icon" viewBox="0 0 24 24" fill="#fff"><path d="M7 4l14 8-14 8V4z"/></svg>
+          <span id="t_playBrowser">Play here in browser</span>
+        </button>
+        <button class="actionBtn install" id="installBtn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+          <span id="t_installDevice">Install game on device</span>
+        </button>
+      </div>
+
+      <div class="legend" id="legend"></div>
+      <div style="font-size:clamp(12px,3.2vw,13px);color:#7a6640" id="t_instructions">Tap or click ants fast before they duck back in. Chain hits to build a score-multiplying combo!</div>
+
+      <button class="btn secondary" id="shareBtnStart">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.2M8.6 13.4l6.8 3.2"/></svg>
+        <span id="t_share">Share Game</span>
+      </button>
+      <div class="adSlot hidden" id="adStart"></div>
+    </div>
+  </div>
+
+  <!-- Pause screen -->
+  <div class="overlay hidden" id="pauseScreen">
+    <div class="card">
+      <h1 id="t_paused">Paused</h1>
+      <div class="endActions" style="margin-top:14px">
+        <button class="btn" id="resumeBtn">
+          <svg class="icon" viewBox="0 0 24 24" fill="#fff"><path d="M7 4l14 8-14 8V4z"/></svg>
+          <span id="t_resume">Resume</span>
+        </button>
+        <button class="btn secondary" id="quitBtn"><span id="t_quit">Main menu</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End screen -->
+  <div class="overlay hidden" id="endScreen">
+    <div class="card">
+      <h1 id="t_timesUp">Time's Up!</h1>
+      <div class="bigScore" id="finalScore">0</div>
+      <div id="newBestBadge" class="newBestBadge hidden">
+        <svg class="icon" viewBox="0 0 24 24" fill="#b8860f"><path d="M6 3h12v3a5 5 0 01-5 5h-2a5 5 0 01-5-5V3z"/><path d="M4 4H2v2a4 4 0 004 4M20 4h2v2a4 4 0 01-4 4" stroke="#b8860f" stroke-width="2" fill="none" stroke-linecap="round"/><rect x="10" y="15" width="4" height="4" fill="#b8860f"/><rect x="7" y="19" width="10" height="2" fill="#b8860f"/></svg>
+        <span id="t_newBest">New high score!</span>
+      </div>
+      <div class="stats">
+        <div><span id="t_bestScore">Best score:</span> <b id="bestScore">0</b></div>
+        <div><span id="t_topCombo">Top combo:</span> <b id="bestCombo">×1</b></div>
+        <div><span id="t_smashed">Ants smashed:</span> <b id="smashedVal">0</b></div>
+        <div><span id="t_accuracy">Accuracy:</span> <b id="accVal">0%</b></div>
+      </div>
+      <div class="endActions">
+        <button class="btn" id="retryBtn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 21v-6h6"/></svg>
+          <span id="t_playAgain">Play Again</span>
+        </button>
+        <button class="btn secondary" id="shareBtnEnd">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.2M8.6 13.4l6.8 3.2"/></svg>
+          <span id="t_shareScore">Share Score</span>
+        </button>
+        <button class="btn secondary" id="menuBtn"><span id="t_quit2">Main menu</span></button>
+      </div>
+      <div class="adSlot hidden" id="adEnd"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="flash"></div>
+<div id="watermark"></div>
+
+<div id="offlineNotice" class="hidden">
+  <div class="box">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#f6ecd2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9l2 2c4.9-4.9 12.1-4.9 17 0l2-2C15.5 2.5 8.5 2.5 1 9z"/><path d="M5 13l2 2a7.1 7.1 0 0110 0l2-2a10 10 0 00-14 0z"/><path d="M9 17l2 2a2.8 2.8 0 012 0l2-2a5.6 5.6 0 00-6 0z"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+    <h2 id="t_offlineTitle">Internet connection required</h2>
+    <p id="t_offlineText">Ant Smash needs an internet connection to play. Please reconnect and try again.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------------- URL options (used for video recording) ----------------
+  const Q = new URLSearchParams(location.search);
+  const THEMES = ["night","candy","desert","lava","snow"];
+  if(THEMES.includes(Q.get("theme"))) document.body.classList.add("theme-" + Q.get("theme"));
+
+  // ---------------- Safe storage ----------------
+  const store = {
+    get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } },
+    set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  };
+
+  // ---------------- i18n ----------------
+  const DICT = {
+    en:{ title:"Ant Smash", subtitle:"Garden Edition", playBrowser:"Play here in browser", installDevice:"Install game on device",
+      leg1:"Common ant — 1 point", leg2:"Fast red ant — 2 points", leg3:"Rare golden ant — 5 points", leg4:"Bee — don't smash it, costs points!",
+      instructions:"Tap or click ants fast before they duck back in. Chain hits to build a score-multiplying combo!",
+      share:"Share Game", timesUp:"Time's Up!", bestScore:"Best score:", topCombo:"Top combo:", newBest:"New high score!",
+      playAgain:"Play Again", shareScore:"Share Score", offlineTitle:"Internet connection required", offlineText:"Ant Smash needs an internet connection to play. Please reconnect and try again.",
+      shareText:"I just played Ant Smash — Garden Edition! Try to beat my score:" },
+    ar:{ title:"سحق النمل", subtitle:"نسخة الحديقة", playBrowser:"العب هنا في المتصفح", installDevice:"ثبّت اللعبة على جهازك",
+      leg1:"نملة عادية — نقطة واحدة", leg2:"نملة حمراء سريعة — نقطتان", leg3:"نملة ذهبية نادرة — 5 نقاط", leg4:"نحلة — لا تضربها، تخصم نقاطًا!",
+      instructions:"اضغط على النمل بسرعة قبل أن يختبئ. اصنع سلسلة ضربات لمضاعفة نقاطك!",
+      share:"شارك اللعبة", timesUp:"انتهى الوقت!", bestScore:"أفضل نتيجة:", topCombo:"أعلى سلسلة:", newBest:"رقم قياسي جديد!",
+      playAgain:"العب مجددًا", shareScore:"شارك نتيجتك", offlineTitle:"يلزم اتصال بالإنترنت", offlineText:"تحتاج اللعبة إلى اتصال بالإنترنت. يرجى إعادة الاتصال والمحاولة مجددًا.",
+      shareText:"لعبت للتو سحق النمل - نسخة الحديقة! حاول التغلب على نتيجتي:" },
+    fr:{ title:"Écrase-Fourmis", subtitle:"Édition Jardin", playBrowser:"Jouer dans le navigateur", installDevice:"Installer sur l'appareil",
+      leg1:"Fourmi commune — 1 point", leg2:"Fourmi rouge rapide — 2 points", leg3:"Fourmi dorée rare — 5 points", leg4:"Abeille — ne pas écraser, retire des points !",
+      instructions:"Touchez les fourmis avant qu'elles ne se cachent. Enchaînez les coups pour multiplier votre score !",
+      share:"Partager le jeu", timesUp:"Temps écoulé !", bestScore:"Meilleur score :", topCombo:"Meilleure série :", newBest:"Nouveau record !",
+      playAgain:"Rejouer", shareScore:"Partager le score", offlineTitle:"Connexion Internet requise", offlineText:"Une connexion Internet est nécessaire pour jouer. Reconnectez-vous et réessayez.",
+      shareText:"Je viens de jouer à Écrase-Fourmis — Édition Jardin ! Essaie de battre mon score :" },
+    es:{ title:"Aplasta Hormigas", subtitle:"Edición Jardín", playBrowser:"Jugar en el navegador", installDevice:"Instalar en el dispositivo",
+      leg1:"Hormiga común — 1 punto", leg2:"Hormiga roja rápida — 2 puntos", leg3:"Hormiga dorada rara — 5 puntos", leg4:"¡Abeja! No la aplastes, resta puntos",
+      instructions:"Toca las hormigas rápido antes de que se escondan. ¡Encadena golpes para multiplicar tu puntaje!",
+      share:"Compartir juego", timesUp:"¡Se acabó el tiempo!", bestScore:"Mejor puntaje:", topCombo:"Mejor racha:", newBest:"¡Nuevo récord!",
+      playAgain:"Jugar de nuevo", shareScore:"Compartir puntaje", offlineTitle:"Se requiere conexión a Internet", offlineText:"Ant Smash necesita conexión a Internet para jugar. Reconéctate e inténtalo de nuevo.",
+      shareText:"¡Acabo de jugar Aplasta Hormigas — Edición Jardín! Intenta superar mi puntaje:" },
+    de:{ title:"Ameisen Klatschen", subtitle:"Garten-Edition", playBrowser:"Im Browser spielen", installDevice:"App installieren",
+      leg1:"Gewöhnliche Ameise — 1 Punkt", leg2:"Schnelle rote Ameise — 2 Punkte", leg3:"Seltene goldene Ameise — 5 Punkte", leg4:"Biene — nicht klatschen, kostet Punkte!",
+      instructions:"Tippe schnell auf die Ameisen, bevor sie verschwinden. Verkette Treffer für einen Punkte-Multiplikator!",
+      share:"Spiel teilen", timesUp:"Zeit abgelaufen!", bestScore:"Bester Punktestand:", topCombo:"Beste Combo:", newBest:"Neuer Rekord!",
+      playAgain:"Nochmal spielen", shareScore:"Punktestand teilen", offlineTitle:"Internetverbindung erforderlich", offlineText:"Ant Smash benötigt eine Internetverbindung. Bitte erneut verbinden und versuchen.",
+      shareText:"Ich habe gerade Ameisen Klatschen — Garten-Edition gespielt! Versuch meinen Punktestand zu schlagen:" },
+    pt:{ title:"Esmaga Formigas", subtitle:"Edição Jardim", playBrowser:"Jogar no navegador", installDevice:"Instalar no dispositivo",
+      leg1:"Formiga comum — 1 ponto", leg2:"Formiga vermelha rápida — 2 pontos", leg3:"Formiga dourada rara — 5 pontos", leg4:"Abelha — não esmague, tira pontos!",
+      instructions:"Toque nas formigas rápido antes que se escondam. Encadeie acertos para multiplicar sua pontuação!",
+      share:"Compartilhar jogo", timesUp:"Tempo esgotado!", bestScore:"Melhor pontuação:", topCombo:"Melhor combo:", newBest:"Novo recorde!",
+      playAgain:"Jogar novamente", shareScore:"Compartilhar pontuação", offlineTitle:"Conexão à internet necessária", offlineText:"O jogo precisa de internet para funcionar. Reconecte-se e tente novamente.",
+      shareText:"Acabei de jogar Esmaga Formigas — Edição Jardim! Tente superar minha pontuação:" },
+    ru:{ title:"Дави Муравьёв", subtitle:"Садовое издание", playBrowser:"Играть в браузере", installDevice:"Установить на устройство",
+      leg1:"Обычный муравей — 1 очко", leg2:"Быстрый красный муравей — 2 очка", leg3:"Редкий золотой муравей — 5 очков", leg4:"Пчела — не бей её, минус очки!",
+      instructions:"Быстро нажимайте на муравьёв, пока они не спрятались. Соединяйте удары для множителя очков!",
+      share:"Поделиться игрой", timesUp:"Время вышло!", bestScore:"Лучший счёт:", topCombo:"Лучшая серия:", newBest:"Новый рекорд!",
+      playAgain:"Играть снова", shareScore:"Поделиться счётом", offlineTitle:"Требуется подключение к интернету", offlineText:"Для игры нужен интернет. Подключитесь и попробуйте снова.",
+      shareText:"Я только что играл в Дави Муравьёв — Садовое издание! Попробуй побить мой счёт:" },
+    tr:{ title:"Karınca Ez", subtitle:"Bahçe Sürümü", playBrowser:"Tarayıcıda oyna", installDevice:"Cihaza yükle",
+      leg1:"Sıradan karınca — 1 puan", leg2:"Hızlı kırmızı karınca — 2 puan", leg3:"Nadir altın karınca — 5 puan", leg4:"Arı — ezme, puan kaybettirir!",
+      instructions:"Karıncalar saklanmadan önce hızlıca dokun. Puanını katlamak için art arda vur!",
+      share:"Oyunu paylaş", timesUp:"Süre doldu!", bestScore:"En iyi skor:", topCombo:"En iyi kombo:", newBest:"Yeni rekor!",
+      playAgain:"Tekrar oyna", shareScore:"Skoru paylaş", offlineTitle:"İnternet bağlantısı gerekli", offlineText:"Oynamak için internet bağlantısı gerekir. Lütfen tekrar bağlanıp deneyin.",
+      shareText:"Az önce Karınca Ez — Bahçe Sürümü oynadım! Skorumu geçmeyi dene:" },
+    id:{ title:"Hancurkan Semut", subtitle:"Edisi Taman", playBrowser:"Main di browser", installDevice:"Instal di perangkat",
+      leg1:"Semut biasa — 1 poin", leg2:"Semut merah cepat — 2 poin", leg3:"Semut emas langka — 5 poin", leg4:"Lebah — jangan dipukul, kurangi poin!",
+      instructions:"Ketuk semut dengan cepat sebelum bersembunyi. Rangkai pukulan untuk melipatgandakan skor!",
+      share:"Bagikan game", timesUp:"Waktu habis!", bestScore:"Skor terbaik:", topCombo:"Combo terbaik:", newBest:"Rekor baru!",
+      playAgain:"Main lagi", shareScore:"Bagikan skor", offlineTitle:"Koneksi internet diperlukan", offlineText:"Ant Smash butuh koneksi internet untuk bermain. Sambungkan kembali dan coba lagi.",
+      shareText:"Saya baru saja main Hancurkan Semut — Edisi Taman! Coba kalahkan skor saya:" },
+    hi:{ title:"चींटी कुचलो", subtitle:"गार्डन संस्करण", playBrowser:"ब्राउज़र में खेलें", installDevice:"डिवाइस पर इंस्टॉल करें",
+      leg1:"सामान्य चींटी — 1 अंक", leg2:"तेज़ लाल चींटी — 2 अंक", leg3:"दुर्लभ सुनहरी चींटी — 5 अंक", leg4:"मधुमक्खी — मत मारो, अंक कटेंगे!",
+      instructions:"चींटियों के छिपने से पहले जल्दी टैप करें। स्कोर बढ़ाने के लिए लगातार वार करें!",
+      share:"गेम शेयर करें", timesUp:"समय समाप्त!", bestScore:"सर्वश्रेष्ठ स्कोर:", topCombo:"सर्वश्रेष्ठ कॉम्बो:", newBest:"नया रिकॉर्ड!",
+      playAgain:"फिर से खेलें", shareScore:"स्कोर शेयर करें", offlineTitle:"इंटरनेट कनेक्शन आवश्यक है", offlineText:"खेलने के लिए इंटरनेट कनेक्शन चाहिए। कृपया फिर से कनेक्ट करें।",
+      shareText:"मैंने अभी चींटी कुचलो — गार्डन संस्करण खेला! मेरा स्कोर हराने की कोशिश करो:" },
+    zh:{ title:"打蚂蚁", subtitle:"花园版", playBrowser:"在浏览器中玩", installDevice:"安装到设备",
+      leg1:"普通蚂蚁 — 1分", leg2:"快速红蚂蚁 — 2分", leg3:"稀有金蚂蚁 — 5分", leg4:"蜜蜂 — 别打，会扣分！",
+      instructions:"趁蚂蚁躲回去之前快速点击。连续命中可获得得分倍增！",
+      share:"分享游戏", timesUp:"时间到！", bestScore:"最高分：", topCombo:"最高连击：", newBest:"新纪录！",
+      playAgain:"再玩一次", shareScore:"分享分数", offlineTitle:"需要网络连接", offlineText:"游戏需要网络连接才能进行，请重新连接后再试。",
+      shareText:"我刚玩了打蚂蚁——花园版！来试试打败我的分数吧：" },
+    ja:{ title:"アリたたき", subtitle:"ガーデン版", playBrowser:"ブラウザでプレイ", installDevice:"デバイスにインストール",
+      leg1:"普通のアリ — 1点", leg2:"素早い赤いアリ — 2点", leg3:"レアな金色のアリ — 5点", leg4:"ハチ — たたくと減点！",
+      instructions:"アリが隠れる前に素早くタップ！連続ヒットでスコア倍率アップ！",
+      share:"ゲームをシェア", timesUp:"タイムアップ！", bestScore:"ベストスコア：", topCombo:"最大コンボ：", newBest:"新記録！",
+      playAgain:"もう一度プレイ", shareScore:"スコアをシェア", offlineTitle:"インターネット接続が必要です", offlineText:"プレイにはインターネット接続が必要です。再接続してお試しください。",
+      shareText:"アリたたき ガーデン版で遊びました！スコアを超えられるかな：" },
+    ko:{ title:"개미 잡기", subtitle:"가든 에디션", playBrowser:"브라우저에서 플레이", installDevice:"기기에 설치",
+      leg1:"일반 개미 — 1점", leg2:"빠른 빨간 개미 — 2점", leg3:"희귀 황금 개미 — 5점", leg4:"벌 — 때리면 감점!",
+      instructions:"개미가 숨기 전에 빠르게 탭하세요. 연속 타격으로 점수 배율을 올리세요!",
+      share:"게임 공유", timesUp:"시간 종료!", bestScore:"최고 점수:", topCombo:"최고 콤보:", newBest:"신기록!",
+      playAgain:"다시 플레이", shareScore:"점수 공유", offlineTitle:"인터넷 연결이 필요합니다", offlineText:"플레이하려면 인터넷 연결이 필요합니다. 다시 연결 후 시도하세요.",
+      shareText:"방금 개미 잡기 — 가든 에디션을 플레이했어요! 제 점수를 이겨보세요:" }
+  };
+
+  // Strings added in the upgrade (falls back to English when missing)
+  const EXTRA = {
+    en:{ best:"Best", paused:"Paused", resume:"Resume", quit:"Main menu", go:"Go!", leg5:"Clock — +5 seconds", leg6:"Lightning — double points for 6 s",
+      smashed:"Ants smashed:", accuracy:"Accuracy:", level:"Level", frenzy:"FRENZY ×2!",
+      installIOS:"Tap the Share icon in Safari, then 'Add to Home Screen'.", installOther:"Open your browser menu and choose 'Install app' or 'Add to Home screen'.", copied:"Link copied!", pause:"Pause", sound:"Sound" },
+    ar:{ best:"الأفضل", paused:"إيقاف مؤقت", resume:"متابعة", quit:"القائمة الرئيسية", go:"انطلق!", leg5:"ساعة — +5 ثوانٍ", leg6:"صاعقة — نقاط مضاعفة لمدة 6 ثوانٍ",
+      smashed:"النمل المسحوق:", accuracy:"الدقة:", level:"المستوى", frenzy:"جنون ×2!",
+      installIOS:"اضغط على أيقونة المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية».", installOther:"افتح قائمة المتصفح واختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».", copied:"تم نسخ الرابط!", pause:"إيقاف مؤقت", sound:"الصوت" },
+    fr:{ best:"Meilleur", paused:"Pause", resume:"Reprendre", quit:"Menu principal", go:"Partez !", leg5:"Horloge — +5 secondes", leg6:"Éclair — points doublés pendant 6 s",
+      smashed:"Fourmis écrasées :", accuracy:"Précision :", level:"Niveau", frenzy:"FRÉNÉSIE ×2 !",
+      installIOS:"Touchez l'icône Partager dans Safari, puis « Sur l'écran d'accueil ».", installOther:"Ouvrez le menu du navigateur et choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».", copied:"Lien copié !", pause:"Pause", sound:"Son" },
+    es:{ best:"Mejor", paused:"Pausa", resume:"Continuar", quit:"Menú principal", go:"¡Ya!", leg5:"Reloj — +5 segundos", leg6:"Rayo — puntos dobles durante 6 s",
+      smashed:"Hormigas aplastadas:", accuracy:"Precisión:", level:"Nivel", frenzy:"¡FRENESÍ ×2!",
+      installIOS:"Toca el icono Compartir en Safari y luego «Añadir a pantalla de inicio».", installOther:"Abre el menú del navegador y elige «Instalar app» o «Añadir a pantalla de inicio».", copied:"¡Enlace copiado!", pause:"Pausa", sound:"Sonido" },
+    de:{ best:"Bestwert", paused:"Pause", resume:"Weiter", quit:"Hauptmenü", go:"Los!", leg5:"Uhr — +5 Sekunden", leg6:"Blitz — doppelte Punkte für 6 s",
+      smashed:"Ameisen erwischt:", accuracy:"Genauigkeit:", level:"Level", frenzy:"RAUSCH ×2!",
+      installIOS:"Tippe in Safari auf Teilen und dann »Zum Home-Bildschirm«.", installOther:"Öffne das Browsermenü und wähle »App installieren« oder »Zum Startbildschirm hinzufügen«.", copied:"Link kopiert!", pause:"Pause", sound:"Ton" },
+    pt:{ best:"Melhor", paused:"Pausa", resume:"Continuar", quit:"Menu principal", go:"Já!", leg5:"Relógio — +5 segundos", leg6:"Raio — pontos em dobro por 6 s",
+      smashed:"Formigas esmagadas:", accuracy:"Precisão:", level:"Nível", frenzy:"FRENESI ×2!",
+      installIOS:"Toque no ícone Compartilhar no Safari e depois em “Adicionar à Tela de Início”.", installOther:"Abra o menu do navegador e escolha “Instalar app” ou “Adicionar à tela inicial”.", copied:"Link copiado!", pause:"Pausa", sound:"Som" },
+    ru:{ best:"Рекорд", paused:"Пауза", resume:"Продолжить", quit:"Главное меню", go:"Вперёд!", leg5:"Часы — +5 секунд", leg6:"Молния — двойные очки на 6 с",
+      smashed:"Раздавлено муравьёв:", accuracy:"Точность:", level:"Уровень", frenzy:"БЕЗУМИЕ ×2!",
+      installIOS:"Нажмите «Поделиться» в Safari, затем «На экран Домой».", installOther:"Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».", copied:"Ссылка скопирована!", pause:"Пауза", sound:"Звук" },
+    tr:{ best:"En iyi", paused:"Duraklatıldı", resume:"Devam et", quit:"Ana menü", go:"Başla!", leg5:"Saat — +5 saniye", leg6:"Şimşek — 6 sn boyunca çift puan",
+      smashed:"Ezilen karınca:", accuracy:"İsabet:", level:"Seviye", frenzy:"COŞKU ×2!",
+      installIOS:"Safari'de Paylaş simgesine, ardından 'Ana Ekrana Ekle'ye dokunun.", installOther:"Tarayıcı menüsünü açıp 'Uygulamayı yükle' veya 'Ana ekrana ekle'yi seçin.", copied:"Bağlantı kopyalandı!", pause:"Duraklat", sound:"Ses" },
+    id:{ best:"Terbaik", paused:"Dijeda", resume:"Lanjut", quit:"Menu utama", go:"Mulai!", leg5:"Jam — +5 detik", leg6:"Petir — poin ganda selama 6 detik",
+      smashed:"Semut terpukul:", accuracy:"Akurasi:", level:"Level", frenzy:"GILA ×2!",
+      installIOS:"Ketuk ikon Bagikan di Safari, lalu 'Tambah ke Layar Utama'.", installOther:"Buka menu browser dan pilih 'Instal aplikasi' atau 'Tambahkan ke layar utama'.", copied:"Tautan disalin!", pause:"Jeda", sound:"Suara" },
+    hi:{ best:"सर्वश्रेष्ठ", paused:"रुका हुआ", resume:"जारी रखें", quit:"मुख्य मेनू", go:"शुरू!", leg5:"घड़ी — +5 सेकंड", leg6:"बिजली — 6 सेकंड तक दोगुने अंक",
+      smashed:"कुचली चींटियाँ:", accuracy:"सटीकता:", level:"स्तर", frenzy:"जोश ×2!",
+      installIOS:"Safari में शेयर आइकन दबाएँ, फिर 'होम स्क्रीन पर जोड़ें' चुनें।", installOther:"ब्राउज़र मेनू खोलें और 'ऐप इंस्टॉल करें' या 'होम स्क्रीन पर जोड़ें' चुनें।", copied:"लिंक कॉपी हो गया!", pause:"रोकें", sound:"ध्वनि" },
+    zh:{ best:"最高", paused:"已暂停", resume:"继续", quit:"主菜单", go:"开始！", leg5:"时钟 — +5秒", leg6:"闪电 — 6秒内得分翻倍",
+      smashed:"击中蚂蚁：", accuracy:"命中率：", level:"等级", frenzy:"狂热 ×2！",
+      installIOS:"在 Safari 中点按分享图标，然后选择“添加到主屏幕”。", installOther:"打开浏览器菜单，选择“安装应用”或“添加到主屏幕”。", copied:"链接已复制！", pause:"暂停", sound:"声音" },
+    ja:{ best:"ベスト", paused:"一時停止", resume:"再開", quit:"メインメニュー", go:"スタート！", leg5:"時計 — +5秒", leg6:"いなずま — 6秒間ポイント2倍",
+      smashed:"つぶしたアリ：", accuracy:"命中率：", level:"レベル", frenzy:"フィーバー ×2！",
+      installIOS:"Safariで共有アイコンをタップし、「ホーム画面に追加」を選んでください。", installOther:"ブラウザのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。", copied:"リンクをコピーしました！", pause:"一時停止", sound:"サウンド" },
+    ko:{ best:"최고", paused:"일시정지", resume:"계속하기", quit:"메인 메뉴", go:"시작!", leg5:"시계 — +5초", leg6:"번개 — 6초 동안 점수 2배",
+      smashed:"잡은 개미:", accuracy:"정확도:", level:"레벨", frenzy:"프렌지 ×2!",
+      installIOS:"Safari에서 공유 아이콘을 누르고 '홈 화면에 추가'를 선택하세요.", installOther:"브라우저 메뉴에서 '앱 설치' 또는 '홈 화면에 추가'를 선택하세요.", copied:"링크가 복사되었습니다!", pause:"일시정지", sound:"소리" }
+  };
+
+  // Game language. "en" = English only. Set to null to auto-detect the visitor's language.
+  const FORCE_LANG = "en";
+  const RTL_LANGS = ["ar","he","fa","ur"];
+  function detectLang(){
+    const langs = navigator.languages || [navigator.language || "en"];
+    for(const l of langs){
+      const code = l.slice(0,2).toLowerCase();
+      if(DICT[code]) return code;
+    }
+    return "en";
+  }
+  const LANG = FORCE_LANG || detectLang();
+  const STR = Object.assign({}, DICT.en, EXTRA.en, DICT[LANG], EXTRA[LANG]);
+  const IS_RTL = RTL_LANGS.includes(LANG);
+
+  function applyLang(){
+    const t = STR;
+    document.documentElement.lang = LANG;
+    document.documentElement.dir = IS_RTL ? "rtl" : "ltr";
+    document.title = t.title + " — " + t.subtitle;
+    const map = {
+      t_title:t.title, t_subtitle:t.subtitle, t_playBrowser:t.playBrowser, t_installDevice:t.installDevice,
+      t_instructions:t.instructions, t_share:t.share, t_timesUp:t.timesUp, t_bestScore:t.bestScore,
+      t_topCombo:t.topCombo, t_newBest:t.newBest, t_playAgain:t.playAgain, t_shareScore:t.shareScore,
+      t_offlineTitle:t.offlineTitle, t_offlineText:t.offlineText, t_paused:t.paused, t_resume:t.resume,
+      t_quit:t.quit, t_quit2:t.quit, t_smashed:t.smashed, t_accuracy:t.accuracy
+    };
+    for(const id in map){ const el = document.getElementById(id); if(el) el.textContent = map[id]; }
+    document.getElementById("pauseBtn").setAttribute("aria-label", t.pause);
+    document.getElementById("soundBtn").setAttribute("aria-label", t.sound);
+  }
+  applyLang();
+
+  // ---------------- Mobile viewport height fix ----------------
+  function setVH(){ document.documentElement.style.setProperty('--vh', (window.innerHeight*0.01)+'px'); }
+  setVH();
+  window.addEventListener('resize', setVH);
+  window.addEventListener('orientationchange', setVH);
+
+  // ---------------- Audio ----------------
+  let actx, master;
+  let muted = store.get("antSmash_muted", "0") === "1";
+  function ac(){
+    if(!actx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      actx = new AC();
+      master = actx.createGain(); master.gain.value = 1; master.connect(actx.destination);
+    }
+    if(actx.state === "suspended") actx.resume();
+    return actx;
+  }
+  function beep(freq, dur, type, vol, glideTo, delay){
+    if(muted) return;
+    try{
+      const c = ac(); if(!c) return;
+      const t0 = c.currentTime + (delay||0);
+      const o = c.createOscillator(); const g = c.createGain();
+      o.type = type || "sine"; o.frequency.setValueAtTime(freq, t0);
+      if(glideTo) o.frequency.exponentialRampToValueAtTime(glideTo, t0 + dur);
+      g.gain.setValueAtTime(vol||0.2, t0);
+      g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+      o.connect(g); g.connect(master);
+      o.start(t0); o.stop(t0 + dur + 0.02);
+    }catch(e){}
+  }
+  const sfx = {
+    smashNormal: () => beep(180, .12, "square", .25, 60),
+    smashGold:   () => { beep(660,.09,"sine",.25,880); beep(990,.12,"sine",.2,1200,.07); },
+    smashBee:    () => beep(120, .25, "sawtooth", .25, 40),
+    clock:       () => { beep(520,.08,"triangle",.25,780); beep(780,.1,"triangle",.25,1040,.08); beep(1040,.14,"triangle",.22,1300,.16); },
+    frenzy:      () => { beep(300,.1,"sawtooth",.18,600); beep(600,.12,"sawtooth",.18,1200,.09); },
+    combo:       (n) => beep(420 + Math.min(n,12)*45, .08, "triangle", .15),
+    tick:        () => beep(880, .04, "square", .06),
+    count:       () => beep(520, .12, "sine", .22),
+    go:          () => beep(880, .25, "sine", .25, 1320),
+    whiff:       () => beep(90, .06, "sine", .1, 60),
+    gameOver:    () => { beep(300,.2,"sine",.2,180); beep(200,.3,"sine",.2,100,.15); },
+    newBest:     () => [523,659,784,1047].forEach((f,i)=>beep(f,.16,"triangle",.2,f*1.02,i*.11))
+  };
+  // Event log (read by the video factory to rebuild the soundtrack in sync)
+  window.__LOG = window.__LOG || null;
+  for(const k of Object.keys(sfx)){
+    const f = sfx[k];
+    sfx[k] = (...a) => { if(window.__LOG) window.__LOG.push({ t:performance.now(), k, a }); return f(...a); };
+  }
+  const vibrate = (ms) => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
+
+  const soundBtn = document.getElementById("soundBtn");
+  soundBtn.classList.toggle("muted", muted);
+  soundBtn.addEventListener("click", () => {
+    muted = !muted; store.set("antSmash_muted", muted ? "1" : "0");
+    soundBtn.classList.toggle("muted", muted);
+    if(!muted){ ac(); sfx.count(); }
+  });
+
+  // ---------------- SVG critters ----------------
+  function antSVG(color, extra){
+    return `<svg viewBox="0 0 100 120">
+      <g class="legs" stroke="#f6ecd2" stroke-width="3" stroke-linecap="round">
+        <line x1="40" y1="55" x2="20" y2="45"/><line x1="40" y1="65" x2="18" y2="65"/><line x1="40" y1="75" x2="20" y2="85"/>
+        <line x1="60" y1="55" x2="80" y2="45"/><line x1="60" y1="65" x2="82" y2="65"/><line x1="60" y1="75" x2="80" y2="85"/>
+      </g>
+      <ellipse cx="50" cy="88" rx="17" ry="20" fill="${color}" stroke="#f6ecd2" stroke-width="3"/>
+      <ellipse cx="50" cy="58" rx="12" ry="14" fill="${color}" stroke="#f6ecd2" stroke-width="3"/>
+      <ellipse cx="50" cy="30" rx="9" ry="10" fill="${color}" stroke="#f6ecd2" stroke-width="3"/>
+      <line x1="43" y1="22" x2="30" y2="6" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <line x1="57" y1="22" x2="70" y2="6" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="46" cy="28" r="2.6" fill="#fff"/><circle cx="54" cy="28" r="2.6" fill="#fff"/>
+      <circle cx="46.5" cy="28.5" r="1.2" fill="#221708"/><circle cx="54.5" cy="28.5" r="1.2" fill="#221708"/>
+      ${extra||""}
+    </svg>`;
+  }
+  const SPARKLE = `<path class="shine" d="M84 14l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff6c8"/>`;
+  function beeSVG(){
+    return `<svg viewBox="0 0 100 100"><g class="bob">
+      <ellipse class="wing" cx="34" cy="30" rx="14" ry="10" fill="#eef3f7" opacity=".85" transform="rotate(-20 34 30)"/>
+      <ellipse class="wing" cx="66" cy="30" rx="14" ry="10" fill="#eef3f7" opacity=".85" transform="rotate(20 66 30)"/>
+      <ellipse cx="50" cy="55" rx="26" ry="24" fill="#f1c40f" stroke="#1c1208" stroke-width="4"/>
+      <path d="M26 42 Q50 55 74 42" stroke="#1c1208" stroke-width="6" fill="none"/>
+      <path d="M22 60 Q50 72 78 60" stroke="#1c1208" stroke-width="6" fill="none"/>
+      <circle cx="40" cy="48" r="3" fill="#1c1208"/><circle cx="60" cy="48" r="3" fill="#1c1208"/>
+      <path d="M44 56q6 4 12 0" stroke="#1c1208" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </g></svg>`;
+  }
+  function clockSVG(){
+    return `<svg viewBox="0 0 100 100"><g class="bob">
+      <circle cx="50" cy="52" r="34" fill="#3f7fb0" stroke="#f6ecd2" stroke-width="4"/>
+      <circle cx="50" cy="52" r="26" fill="#f6ecd2"/>
+      <path d="M50 36v17l12 8" stroke="#221708" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="42" y="12" width="16" height="7" rx="3" fill="#f6ecd2" stroke="#1c1208" stroke-width="2"/>
+      <text x="50" y="96" text-anchor="middle" font-family="Baloo 2, Nunito, sans-serif" font-weight="800" font-size="22" fill="#8ee08a" stroke="#1c1208" stroke-width="3" paint-order="stroke">+5s</text>
+    </g></svg>`;
+  }
+  function boltSVG(){
+    return `<svg viewBox="0 0 100 100"><g class="bob">
+      <circle cx="50" cy="52" r="34" fill="#6a3fb0" stroke="#f6ecd2" stroke-width="4"/>
+      <path class="shine" d="M56 18L32 56h17l-5 26 26-40H53z" fill="#ffd93a" stroke="#1c1208" stroke-width="3" stroke-linejoin="round"/>
+    </g></svg>`;
+  }
+  const HAMMER = `<svg viewBox="0 0 100 100"><rect x="46" y="38" width="10" height="60" rx="4" fill="#a8743a" stroke="#1c1208" stroke-width="3" transform="rotate(25 50 70)"/><rect x="14" y="10" width="54" height="30" rx="8" fill="#c9ccd1" stroke="#1c1208" stroke-width="3" transform="rotate(25 40 25)"/></svg>`;
+
+
+  // ---------------- Adsterra ads ----------------
+  // 1) In Adsterra: Websites -> add your site -> Add Ad Unit -> "Banner". Copy the KEY from the code
+  //    they give you (the long string in  'key' : '...'  and in the invoke.js URL).
+  // 2) Paste it below. Leave key empty ("") to keep that ad unit disabled.
+  // Ads only appear on the main menu and the game-over screen, never during play.
+  const ADS = {
+    enabled: true,
+    banners: [
+      // Largest first; the first one that fits the screen is used.
+      { key:"", width:300, height:250, host:"www.highperformanceformat.com" },  // 300x250 banner
+      { key:"", width:320, height:50,  host:"www.highperformanceformat.com" }   // 320x50 mobile banner
+    ],
+    // Optional Social Bar: paste the full script URL Adsterra gives you, e.g. "https://pl12345.profitablegatecpm.com/ab/cd/ef/abcdef.js".
+    // Note: the Social Bar floats over the screen, including during play.
+    socialBarSrc: "https://bauval.org/14/de195cc2094d18fa2c8a606c3247e630",
+    // Popunder: loaded once, after the player's first game ends (so the first round is clean).
+    // Adsterra caps how often it fires, but it can react to taps during later rounds.
+    popunderSrc: "https://abscloud.org/1/3f3c56b714be750af4ab7872d97881c8"
+  };
+  const SHORTS = /[?&]shorts(=1|&|$)/.test(location.search);   // add ?shorts to the URL when recording videos: no ads, auto-start, watermark
+
+  function pickBanner(){
+    const maxH = Math.max(50, window.innerHeight * 0.32), maxW = window.innerWidth - 70;
+    return ADS.banners.find(b => b.key && b.width <= maxW && b.height <= maxH) || null;
+  }
+  function showAd(slot){
+    if(!ADS.enabled || SHORTS || !slot) return;
+    const b = pickBanner();
+    slot.innerHTML = "";
+    if(!b || !navigator.onLine){ slot.classList.add("hidden"); return; }
+    const f = document.createElement("iframe");
+    f.width = b.width; f.height = b.height; f.scrolling = "no"; f.title = "Advertisement";
+    f.setAttribute("sandbox", "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-top-navigation-by-user-activation");
+    f.referrerPolicy = "no-referrer-when-downgrade";
+    f.srcdoc = `<!doctype html><html><body style="margin:0;background:transparent"><script>atOptions={'key':'${b.key}','format':'iframe','height':${b.height},'width':${b.width},'params':{}};<\/script><script src="https://${b.host}/${b.key}/invoke.js"><\/script></body></html>`;
+    slot.appendChild(f);
+    slot.classList.remove("hidden");
+  }
+  function hideAd(slot){ if(slot){ slot.innerHTML = ""; slot.classList.add("hidden"); } }
+  function loadScript(src){
+    const sc = document.createElement("script"); sc.src = src; sc.async = true; sc.setAttribute("data-cfasync","false");
+    document.body.appendChild(sc);
+  }
+  if(ADS.enabled && !SHORTS && ADS.socialBarSrc) loadScript(ADS.socialBarSrc);
+  let popLoaded = false;
+  function loadPopunder(){
+    if(popLoaded || !ADS.enabled || SHORTS || !ADS.popunderSrc || !navigator.onLine) return;
+    popLoaded = true; loadScript(ADS.popunderSrc);
+  }
+
+  // ---------------- Game config ----------------
+  const GRID = 9;
+  const START_TIME = Math.min(60000, Math.max(10000, (Number(Q.get("time")) || 60) * 1000));
+  const LVL_MS = 9000 * START_TIME / 60000;   // difficulty steps scale with round length
+  const MAX_TIME = 75000;
+  const FRENZY_MS = 6000;
+  const TYPES = {
+    normal:{ points:1,  life:1000, chance:.52, color:"#8a5a34", sfx:sfx.smashNormal, render:()=>antSVG("#5a3620") },
+    fast:  { points:2,  life:640,  chance:.22, color:"#e0594a", sfx:sfx.smashNormal, render:()=>antSVG("#c0392b") },
+    gold:  { points:5,  life:540,  chance:.07, color:"#f3d27a", sfx:sfx.smashGold,   render:()=>antSVG("#e8b93f", SPARKLE) },
+    bee:   { points:-3, life:950,  chance:.10, color:"#f1c40f", sfx:sfx.smashBee,    render:beeSVG, isBee:true },
+    clock: { points:0,  life:900,  chance:.05, color:"#6fb6e8", sfx:sfx.clock,       render:clockSVG, power:"clock" },
+    frenzy:{ points:0,  life:900,  chance:.04, color:"#ffd93a", sfx:sfx.frenzy,      render:boltSVG,  power:"frenzy" }
+  };
+
+  // ---------------- DOM ----------------
+  const $ = (id) => document.getElementById(id);
+  const field = $("field"), scoreVal = $("scoreVal"), comboPill = $("comboPill"), comboVal = $("comboVal"), streakVal = $("streakVal");
+  const timeVal = $("timeVal"), timePill = $("timePill"), timerFill = $("timerFill");
+  const startScreen = $("startScreen"), endScreen = $("endScreen"), pauseScreen = $("pauseScreen");
+  const pauseBtn = $("pauseBtn"), banner = $("banner"), countdownEl = $("countdown");
+  const offlineNotice = $("offlineNotice");
+
+  // Legend (built from the same critter art)
+  (function buildLegend(){
+    const rows = [["normal","leg1"],["fast","leg2"],["gold","leg3"],["bee","leg4"],["clock","leg5"],["frenzy","leg6"]];
+    $("legend").innerHTML = rows.map(([k,l]) => `<div>${TYPES[k].render()}<span>${STR[l]}</span></div>`).join("");
+  })();
+
+  // ---------------- State ----------------
+  let state = "menu";            // menu | countdown | playing | paused | over
+  let holes = [];
+  let score = 0, streak = 0, timeLeft = START_TIME, elapsed = 0;
+  let nextSpawn = 0, frenzyLeft = 0, level = 1, lastSec = 60;
+  let smashed = 0, taps = 0, bestMult = 1, plays = Number(store.get("antSmash_plays", 0));
+  let bestScore = Number(store.get("antSmash_best", 0)) || 0;
+  let cdTimer = null, wakeLock = null;
+
+  const mult = () => Math.min(8, 1 + Math.floor(streak / 4));
+
+  function buildHoles(){
+    holes = [];
+    for(let i=0;i<GRID;i++){
+      const h = document.createElement("div");
+      h.className = "hole";
+      h.innerHTML = `<div class="dust"></div><div class="critter"></div><div class="hammer">${HAMMER}</div>`;
+      field.appendChild(h);
+      const o = { el:h, critterEl:h.querySelector(".critter"), active:false, type:null, ttl:0, cleanup:null };
+      h.addEventListener("pointerdown", (e) => { e.preventDefault(); hit(o); }, {passive:false});
+      holes.push(o);
+    }
+  }
+
+  function restart(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  function setCleanup(h, fn, ms){ clearTimeout(h.cleanup); h.cleanup = setTimeout(fn, ms); }
+
+  function showBanner(text){
+    banner.textContent = text; banner.classList.add("show");
+    clearTimeout(showBanner.t); showBanner.t = setTimeout(()=>banner.classList.remove("show"), 1600);
+  }
+
+
+  // ---------------- Hype effects ----------------
+  const CALLOUTS = { 5:"NICE!", 10:"GREAT!", 15:"AWESOME!", 20:"UNSTOPPABLE!", 30:"LEGENDARY!", 40:"GODLIKE!", 50:"IMPOSSIBLE!" };
+  function callout(text){
+    const c = $("callout"); c.textContent = text; restart(c, "show");
+    restart($("flash"), "on");
+  }
+  function confetti(){
+    const cols = ["#e8b93f","#ff7a3d","#6aa652","#3f7fb0","#f6ecd2","#c0392b"];
+    for(let i=0;i<60;i++){
+      const d = document.createElement("div"); d.className = "confetti";
+      d.style.left = Math.random()*100 + "vw"; d.style.background = cols[i % cols.length];
+      d.style.animationDuration = (1.6 + Math.random()*1.6) + "s"; d.style.animationDelay = (Math.random()*.5) + "s";
+      document.body.appendChild(d); setTimeout(() => d.remove(), 3800);
+    }
+  }
+
+  // ---------------- Spawning ----------------
+  function pickType(){
+    const r = Math.random(); let acc = 0;
+    for(const key in TYPES){
+      if(key === "frenzy" && frenzyLeft > 0) continue;
+      acc += TYPES[key].chance;
+      if(r <= acc) return key;
+    }
+    return "normal";
+  }
+  function spawnOne(){
+    const free = holes.filter(h => !h.active);
+    if(!free.length) return;
+    const h = free[Math.floor(Math.random()*free.length)];
+    const key = pickType(), type = TYPES[key];
+    clearTimeout(h.cleanup);
+    h.active = true; h.type = key; h.el.dataset.type = key;
+    h.critterEl.innerHTML = type.render();
+    h.el.classList.remove("smashed","dodging","whiff");
+    h.el.classList.add("up");
+    h.ttl = Math.max(300, type.life * Math.max(.5, 1 - .07*(level-1)));
+  }
+  function spawnGap(){
+    const base = Math.max(230, 760 - level*55) * (frenzyLeft > 0 ? .7 : 1);
+    return base + Math.random()*260;
+  }
+
+  // ---------------- Actions ----------------
+  function miss(h){
+    if(!h.active) return;
+    h.active = false;
+    h.el.classList.remove("up");
+    h.el.classList.add("dodging");
+    const t = TYPES[h.type];
+    if(!t.isBee && !t.power && streak > 0){ streak = 0; updateCombo(); }
+    setCleanup(h, () => h.el.classList.remove("dodging"), 500);
+  }
+
+  function burst(h, color){
+    for(let i=0;i<7;i++){
+      const p = document.createElement("div");
+      p.className = "particle";
+      const a = (Math.PI*2*i/7) + Math.random()*.6, d = 40 + Math.random()*40;
+      p.style.setProperty("--dx", Math.cos(a)*d + "%");
+      p.style.setProperty("--dy", Math.sin(a)*d - 20 + "%");
+      p.style.background = color;
+      h.el.appendChild(p);
+      setTimeout(()=>p.remove(), 520);
+    }
+  }
+  function floatText(h, text, cls){
+    const f = document.createElement("div");
+    f.className = "floatScore" + (cls ? " "+cls : "");
+    f.textContent = text;
+    h.el.appendChild(f);
+    setTimeout(()=>f.remove(), 760);
+  }
+
+  function hit(h){
+    if(state !== "playing") return;
+    taps++;
+    if(!h.active){
+      restart(h.el, "whiff"); setCleanup(h, () => h.el.classList.remove("whiff"), 360);
+      sfx.whiff();
+      return;
+    }
+    h.active = false;
+    const type = TYPES[h.type];
+    type.sfx();
+    h.el.classList.remove("dodging");
+    restart(h.el, "smashed");
+    burst(h, type.color);
+    setCleanup(h, () => h.el.classList.remove("up","smashed"), 300);
+
+    if(type.isBee){
+      const loss = Math.min(score, -type.points);
+      score -= loss; streak = 0; updateCombo();
+      floatText(h, "-" + (-type.points), "bad");
+      restart(field, "shake"); vibrate(80);
+    } else if(type.power === "clock"){
+      timeLeft = Math.min(MAX_TIME, timeLeft + 5000);
+      floatText(h, "+5s", "good");
+    } else if(type.power === "frenzy"){
+      frenzyLeft = FRENZY_MS; document.body.classList.add("frenzy");
+      showBanner(STR.frenzy);
+      floatText(h, "×2", "good");
+    } else {
+      const m = mult() * (frenzyLeft > 0 ? 2 : 1);
+      const gain = type.points * m;
+      score += gain; smashed++;
+      streak++;
+      if(mult() > bestMult) bestMult = mult();
+      updateCombo();
+      floatText(h, "+" + gain);
+      if(streak % 3 === 0) sfx.combo(streak/3);
+      if(CALLOUTS[streak] || (streak > 50 && streak % 10 === 0)) callout(CALLOUTS[streak] || (streak + " COMBO!"));
+      vibrate(20);
+    }
+    scoreVal.textContent = score;
+  }
+
+  function updateCombo(){
+    comboVal.textContent = "×" + mult();
+    streakVal.textContent = streak;
+    restart(comboPill, "pop");
+  }
+
+  // ---------------- Game loop (delta-time, pause-safe) ----------------
+  let lastTs = 0;
+  function frame(ts){
+    requestAnimationFrame(frame);
+    const dt = Math.min(100, ts - (lastTs || ts)); lastTs = ts;
+    if(state !== "playing") return;
+
+    elapsed += dt; timeLeft -= dt;
+    level = Math.min(9, 1 + Math.floor(elapsed / LVL_MS));
+
+    if(frenzyLeft > 0){
+      frenzyLeft -= dt;
+      if(frenzyLeft <= 0){ frenzyLeft = 0; document.body.classList.remove("frenzy"); }
+    }
+    nextSpawn -= dt;
+    if(nextSpawn <= 0){
+      spawnOne();
+      if(level >= 4 && Math.random() < .35) spawnOne();
+      nextSpawn = spawnGap();
+    }
+    for(const h of holes){
+      if(h.active){ h.ttl -= dt; if(h.ttl <= 0) miss(h); }
+    }
+
+    const sec = Math.max(0, Math.ceil(timeLeft/1000));
+    if(sec !== lastSec){
+      lastSec = sec; timeVal.textContent = sec;
+      timePill.classList.toggle("low", sec <= 10);
+      if(sec <= 10 && sec > 0) sfx.tick();
+    }
+    timerFill.style.width = Math.min(100, Math.max(0, timeLeft/START_TIME*100)) + "%";
+    if(timeLeft <= 0) endGame();
+  }
+  requestAnimationFrame(frame);
+
+  // ---------------- Flow ----------------
+  function clearBoard(){
+    holes.forEach(h => { clearTimeout(h.cleanup); h.active = false; h.el.classList.remove("up","smashed","dodging","whiff"); });
+    document.body.classList.remove("frenzy"); banner.classList.remove("show");
+  }
+  function resetStats(){
+    score = 0; streak = 0; timeLeft = START_TIME; elapsed = 0; level = 1; frenzyLeft = 0;
+    smashed = 0; taps = 0; bestMult = 1; lastSec = START_TIME/1000; nextSpawn = 500;
+    scoreVal.textContent = "0"; comboVal.textContent = "×1"; streakVal.textContent = "0";
+    timeVal.textContent = START_TIME/1000; timerFill.style.width = "100%"; timePill.classList.remove("low");
+  }
+
+  function runCountdown(done){
+    state = "countdown"; pauseBtn.disabled = true;
+    let n = 3;
+    countdownEl.classList.remove("hidden");
+    const step = () => {
+      if(n > 0){ countdownEl.innerHTML = `<span>${n}</span>`; sfx.count(); n--; cdTimer = setTimeout(step, 800); }
+      else { countdownEl.innerHTML = `<span style="font-size:.55em">${STR.go}</span>`; sfx.go();
+             cdTimer = setTimeout(() => { countdownEl.classList.add("hidden"); done(); }, 500); }
+    };
+    step();
+  }
+
+  async function keepAwake(on){
+    try{
+      if(on && "wakeLock" in navigator && !wakeLock){ wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; }); }
+      else if(!on && wakeLock){ await wakeLock.release(); wakeLock = null; }
+    }catch(e){}
+  }
+
+  function beginPlay(){ state = "playing"; pauseBtn.disabled = false; keepAwake(true); }
+
+  function startGame(){
+    if(!navigator.onLine){ updateOnlineState(); return; }
+    ac();
+    clearTimeout(cdTimer);
+    clearBoard(); resetStats();
+    [startScreen, endScreen, pauseScreen].forEach(o => o.classList.add("hidden"));
+    hideAd($("adEnd")); hideAd($("adStart"));
+    runCountdown(beginPlay);
+  }
+
+  function pauseGame(){
+    if(state !== "playing") return;
+    state = "paused"; pauseBtn.disabled = true;
+    pauseScreen.classList.remove("hidden");
+    keepAwake(false);
+  }
+  function resumeGame(){
+    if(state !== "paused") return;
+    pauseScreen.classList.add("hidden");
+    runCountdown(beginPlay);
+  }
+  function toMenu(){
+    clearTimeout(cdTimer); countdownEl.classList.add("hidden");
+    state = "menu"; pauseBtn.disabled = true;
+    clearBoard(); keepAwake(false);
+    [pauseScreen, endScreen].forEach(o => o.classList.add("hidden"));
+    refreshStartBest();
+    startScreen.classList.remove("hidden");
+    hideAd($("adEnd")); showAd($("adStart"));
+  }
+
+  function endGame(){
+    if(state === "over" || state === "menu") return;
+    state = "over"; pauseBtn.disabled = true;
+    clearTimeout(cdTimer); countdownEl.classList.add("hidden");
+    clearBoard(); keepAwake(false);
+    timeVal.textContent = "0"; timePill.classList.remove("low");
+    plays++; store.set("antSmash_plays", plays);
+    $("finalScore").textContent = score;
+    $("bestCombo").textContent = "×" + bestMult;
+    $("smashedVal").textContent = smashed;
+    $("accVal").textContent = (taps ? Math.round(smashed/taps*100) : 0) + "%";
+    const isNew = score > bestScore && score > 0;
+    if(isNew){ bestScore = score; store.set("antSmash_best", bestScore); }
+    $("bestScore").textContent = bestScore;
+    $("newBestBadge").classList.toggle("hidden", !isNew);
+    if(isNew){ sfx.newBest(); confetti(); } else sfx.gameOver();
+    showAd($("adEnd"));
+    loadPopunder();
+    endScreen.classList.remove("hidden");
+  }
+
+  function refreshStartBest(){
+    const el = $("startBest");
+    if(bestScore > 0){ el.textContent = STR.best + ": " + bestScore; el.classList.remove("hidden"); }
+    else el.classList.add("hidden");
+  }
+
+  // ---------------- Online-only enforcement ----------------
+  function updateOnlineState(){
+    offlineNotice.classList.toggle("hidden", navigator.onLine);
+    if(!navigator.onLine && (state === "playing" || state === "countdown" || state === "paused")) endGame();
+  }
+  window.addEventListener("online", updateOnlineState);
+  window.addEventListener("offline", updateOnlineState);
+
+  // ---------------- Controls ----------------
+  $("startBtn").addEventListener("click", startGame);
+  $("retryBtn").addEventListener("click", startGame);
+  $("menuBtn").addEventListener("click", toMenu);
+  $("quitBtn").addEventListener("click", toMenu);
+  $("resumeBtn").addEventListener("click", resumeGame);
+  pauseBtn.addEventListener("click", pauseGame);
+
+  document.addEventListener("visibilitychange", () => {
+    if(document.hidden){
+      if(state === "playing") pauseGame();
+      else if(state === "countdown"){ clearTimeout(cdTimer); countdownEl.classList.add("hidden"); if(timeLeft < START_TIME || elapsed > 0){ state="paused"; pauseScreen.classList.remove("hidden"); } else toMenu(); }
+    } else if(state === "playing") keepAwake(true);
+  });
+
+  // Keyboard: numpad layout (7 8 9 / 4 5 6 / 1 2 3) hits the matching hole, P / Esc pauses
+  const KEYMAP = { "7":0,"8":1,"9":2,"4":3,"5":4,"6":5,"1":6,"2":7,"3":8 };
+  window.addEventListener("keydown", (e) => {
+    if(e.repeat) return;
+    if(e.key in KEYMAP){ hit(holes[KEYMAP[e.key]]); }
+    else if(e.key === "p" || e.key === "P" || e.key === "Escape"){
+      if(state === "playing") pauseGame(); else if(state === "paused") resumeGame();
+    } else if((e.key === "Enter" || e.key === " ") && (state === "menu" || state === "over")){
+      if(document.activeElement && document.activeElement.tagName === "BUTTON") return;
+      startGame();
+    }
+  });
+
+  // ---------------- Share ----------------
+  async function shareGame(withScore){
+    const url = location.href.split("#")[0];
+    const text = withScore ? `${STR.shareText} ${score}` : STR.title + " — " + STR.subtitle;
+    if(navigator.share){
+      try{ await navigator.share({ title: STR.title, text, url }); }catch(e){}
+    } else {
+      try{
+        await navigator.clipboard.writeText(text + " " + url);
+        alert(STR.copied + " " + url);
+      }catch(e){ prompt(STR.copied, url); }
+    }
+  }
+  $("shareBtnStart").addEventListener("click", () => shareGame(false));
+  $("shareBtnEnd").addEventListener("click", () => shareGame(true));
+
+  // ---------------- PWA install ----------------
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+    });
+  }
+  let deferredPrompt = null;
+  const installBtn = $("installBtn");
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  if(isStandalone) installBtn.classList.add("hidden");
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; });
+  installBtn.addEventListener("click", async () => {
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+    } else {
+      alert(/iphone|ipad|ipod/i.test(navigator.userAgent) ? STR.installIOS : STR.installOther);
+    }
+  });
+  window.addEventListener("appinstalled", () => { deferredPrompt = null; installBtn.classList.add("hidden"); });
+
+  // ---------------- Init ----------------
+  window.__game = {
+    get state(){ return state; }, get score(){ return score; }, get streak(){ return streak; }, get timeLeft(){ return timeLeft; },
+    get frenzy(){ return frenzyLeft; }, get level(){ return level; }, get smashed(){ return smashed; }, get taps(){ return taps; },
+    get bestMult(){ return bestMult; }, get bestScore(){ return bestScore; }
+  };
+  timeVal.textContent = START_TIME/1000;
+  buildHoles();
+  refreshStartBest();
+  updateOnlineState();
+  showAd($("adStart"));
+  if(SHORTS){
+    document.body.classList.add("shorts");
+    const wm = Q.get("wm") || "";
+    $("watermark").textContent = wm; if(!wm) $("watermark").style.display = "none";
+    if(!Q.has("manual")) setTimeout(startGame, 400);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "ant-smash-shorts-factory",
+  "version": "1.0.0",
+  "description": "Generates varied, ready-to-upload YouTube Shorts videos of the Ant Smash game (bot plays, records, adds sound and metadata).",
+  "scripts": {
+    "make": "node factory.js make",
+    "plan": "node factory.js plan",
+    "report": "node factory.js report"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  }
+}
