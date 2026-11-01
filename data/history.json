@@ -1,0 +1,79 @@
+[
+  {
+    "id": "short_001",
+    "createdAt": "2026-11-01T06:22:40.205Z",
+    "file": "short_001_clutch.mp4",
+    "concept": "clutch",
+    "theme": "desert",
+    "seed": 1127847925,
+    "time": 14,
+    "hookTpl": "Last seconds… watch this 😳",
+    "hookStyle": "neon",
+    "ctaTpl": "Beat {score} and comment 👇",
+    "ctaStyle": "sticker",
+    "music": {
+      "style": "epic_run",
+      "root": 48,
+      "tempo": 145,
+      "prog": 2,
+      "bassVar": 1,
+      "arpVar": 1,
+      "seed": 1763452204
+    },
+    "bestMode": "chase",
+    "title": "The Final Seconds Changed Everything 😳",
+    "titleTpl": "The Final Seconds Changed Everything 😳",
+    "descIntro": "Quick reflexes needed! Smash the ants and chain a huge combo.",
+    "descTips": [
+      "⚡ Lightning gives double points for 6 seconds",
+      "⏱️ Clocks add 5 extra seconds",
+      "✨ Golden ants are worth 5 points"
+    ],
+    "descQuestion": "Drop your score below and challenge a friend 👇",
+    "bioLine": "🎮 Play the game FREE — link in my bio 🔗",
+    "hashtags": [
+      "#AntSmash",
+      "#MiniGame",
+      "#MobileGame",
+      "#CasualGames"
+    ],
+    "tags": [
+      "clutch",
+      "comeback",
+      "last second",
+      "ant smash",
+      "ant smash game",
+      "whack a mole",
+      "whack an ant",
+      "smash ants game",
+      "mini game",
+      "casual game",
+      "mobile game",
+      "browser game",
+      "free online game",
+      "free game",
+      "addictive game",
+      "tap game",
+      "reflex game",
+      "reaction game",
+      "high score challenge"
+    ],
+    "result": {
+      "score": 182,
+      "bestMult": 6,
+      "smashed": 21,
+      "taps": 29,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "whiff": 7,
+        "smashNormal": 18,
+        "tick": 10,
+        "combo": 7,
+        "smashGold": 3,
+        "frenzy": 1,
+        "gameOver": 1
+      }
+    }
+  }
+]
