@@ -52,7 +52,7 @@ function clean(meta, yt = {}) {
 }
 
 async function uploadVideo(file, meta, yt = {}) {
-  if (!configured()) throw new Error("YouTube is not configured (missing client_secret.json or YT_CLIENT_ID/YT_CLIENT_SECRET, or missing YT_REFRESH_TOKEN).");
+  if (!configured()) throw new Error("YouTube is not configured (missing GitHub secrets: YT_CLIENT_ID, YT_CLIENT_SECRET, YT_REFRESH_TOKEN).");
   const token = await accessToken();
   const body = clean(meta, yt);
   const data = fs.readFileSync(file);

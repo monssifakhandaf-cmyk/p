@@ -45,14 +45,14 @@ node factory.js report                  # تقرير التنوع
 
 ## التشغيل التلقائي على GitHub (توليد → تيليجرام → يوتيوب)
 **الأسرار المطلوبة** (Settings → Secrets and variables → Actions → Secrets):
-`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `YT_REFRESH_TOKEN`
-(ملف `client_secret.json` موجود في المستودع، فلا حاجة لـ `YT_CLIENT_ID` و `YT_CLIENT_SECRET`؛ وإن أضفتهما كأسرار فلهما الأولوية.)
+`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN`
+(`YT_CLIENT_ID` و `YT_CLIENT_SECRET` من ملف JSON الذي نزّلته من Google Cloud: حقلا `client_id` و `client_secret`.)
 (اختياريًا في تبويب Variables: `YT_PRIVACY` بقيمة `public` أو `unlisted` أو `private`).
 
 **الخطوات**
-1. أنشئ مستودعًا جديدًا وارفع محتويات هذا المجلد إلى الجذر. المستودع يجب أن يبقى **خاصًا (Private)** لأنه يحتوي `client_secret.json`.
+1. أنشئ مستودعًا جديدًا وارفع محتويات هذا المجلد إلى الجذر. لا ترفع ملف `client_secret*.json` أبدًا (مُستثنى في `.gitignore`): كل القيم السرية تُوضع في GitHub Secrets فقط.
 2. Settings → Actions → General → Workflow permissions → **Read and write permissions**.
-3. أضف أسرار تيليجرام.
+3. أضف أسرار تيليجرام و `YT_CLIENT_ID` و `YT_CLIENT_SECRET`.
 4. احصل على `YT_REFRESH_TOKEN` مرة واحدة: افتح رابط الموافقة، ثم انسخ قيمة `code=` من شريط العنوان، ثم شغّل workflow **Get YouTube token** والصق الكود فيه. يصلك التوكن على تيليجرام فقط (لا يظهر في السجلات). احفظه كسر ثم احذف الرسالة.
 5. في Google Cloud → OAuth consent screen: انقل التطبيق من **Testing** إلى **In production** حتى لا ينتهي التوكن بعد 7 أيام.
 6. جرّب: Actions → **Make Short, send to Telegram and upload to YouTube** → Run workflow.
