@@ -159,5 +159,93 @@
         "newBest": 1
       }
     }
+  },
+  {
+    "id": "short_003",
+    "createdAt": "2026-11-02T12:55:59.256Z",
+    "file": "short_003_no_bee.mp4",
+    "concept": "no_bee",
+    "theme": "night",
+    "seed": 824304134,
+    "time": 14,
+    "hookTpl": "Not one bee touched 🐝🚫",
+    "hookStyle": "sticker",
+    "bioTpl": "🏆 Beat my score! Link in bio",
+    "bioEndTpl": "🔗 Game link is in my bio!",
+    "ctaTpl": "What's your high score? 👇",
+    "ctaStyle": "pill",
+    "music": {
+      "style": "sunny_pop",
+      "root": 41,
+      "tempo": 104,
+      "prog": 0,
+      "bassVar": 0,
+      "arpVar": 2,
+      "seed": 1866963805
+    },
+    "bestMode": "fresh",
+    "title": "Bee-Free Run: 154 Points 🐝❌",
+    "titleTpl": "Bee-Free Run: {score} Points 🐝❌",
+    "descIntro": "Reflex test time! 🐜 How many ants can you smash?",
+    "descTips": [
+      "🎯 Every 4 hits in a row raises your multiplier",
+      "👀 Watch out: bees look similar when you're rushing",
+      "⚡ Grab the lightning early to get the most out of it"
+    ],
+    "descQuestion": "Which theme do you like most: garden, night, candy, desert, lava or snow? 🎨",
+    "bioLine": "🎯 Challenge accepted? Play now, link in my bio",
+    "hashtags": [
+      "#FreeGames",
+      "#WhackAMole",
+      "#GameShorts",
+      "#TapGame"
+    ],
+    "tags": [
+      "no mistakes",
+      "bee",
+      "perfect run",
+      "bee challenge",
+      "accuracy",
+      "perfect aim",
+      "clean run",
+      "zero bees",
+      "free game no download",
+      "no download game",
+      "html5 game",
+      "addictive games",
+      "tapping game",
+      "reflex test",
+      "reaction time",
+      "high score",
+      "beat my score",
+      "game shorts",
+      "funny game",
+      "time killer",
+      "satisfying games",
+      "arcade games",
+      "quick game",
+      "short game"
+    ],
+    "result": {
+      "score": 154,
+      "bestMult": 5,
+      "smashed": 19,
+      "taps": 28,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "smashNormal": 18,
+        "whiff": 7,
+        "tick": 10,
+        "combo": 6,
+        "frenzy": 2,
+        "smashGold": 1,
+        "newBest": 1
+      }
+    },
+    "youtube": {
+      "id": "8ujsQzVClkA",
+      "privacy": "public"
+    }
   }
 ]
