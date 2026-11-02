@@ -247,5 +247,94 @@
       "id": "8ujsQzVClkA",
       "privacy": "public"
     }
+  },
+  {
+    "id": "short_004",
+    "createdAt": "2026-11-02T13:09:49.953Z",
+    "file": "short_004_pro_run.mp4",
+    "concept": "pro_run",
+    "theme": "lava",
+    "seed": 2119407444,
+    "time": 14,
+    "hookTpl": "Don't blink 👀🐜",
+    "hookStyle": "ribbon",
+    "bioTpl": "Free game → link in bio 🔗",
+    "bioEndTpl": "👆 Play FREE — link in bio!",
+    "ctaTpl": "Can you reach {target}? 👇",
+    "ctaStyle": "sticker",
+    "music": {
+      "style": "funk_groove",
+      "root": 45,
+      "tempo": 110,
+      "prog": 1,
+      "bassVar": 1,
+      "arpVar": 0,
+      "seed": 1938391870
+    },
+    "bestMode": "chase",
+    "title": "Combo ×6 Reached! How Far Can You Go? 🔥",
+    "titleTpl": "Combo ×{combo} Reached! How Far Can You Go? 🔥",
+    "descIntro": "A satisfying little reflex game 🐜✨",
+    "descTips": [
+      "🔥 Don't break your combo, it's worth more than speed",
+      "✨ Golden ants disappear fast: tap them first",
+      "🐜 Normal ants are worth 1 point each"
+    ],
+    "descQuestion": "Best score wins eternal glory! Comment yours 🏆",
+    "bioLine": "▶️ Want to play? The game link is in my bio 🔗",
+    "hashtags": [
+      "#HighScore",
+      "#BrowserGame",
+      "#ArcadeGame",
+      "#ReactionTime"
+    ],
+    "tags": [
+      "high score",
+      "combo",
+      "ant smash challenge",
+      "combo challenge",
+      "perfect run",
+      "max combo",
+      "reflex test",
+      "hit streak",
+      "pro gamer",
+      "fast fingers",
+      "one minute game",
+      "game for android",
+      "game for iphone",
+      "phone game",
+      "pc game",
+      "indie game",
+      "indie game dev",
+      "game dev",
+      "solo dev game",
+      "gameplay",
+      "gameplay shorts",
+      "gaming",
+      "gamer",
+      "games to play when bored",
+      "games to play on phone",
+      "boredom killer"
+    ],
+    "result": {
+      "score": 95,
+      "bestMult": 6,
+      "smashed": 20,
+      "taps": 23,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "whiff": 2,
+        "frenzy": 1,
+        "smashNormal": 20,
+        "combo": 6,
+        "tick": 10,
+        "gameOver": 1
+      }
+    },
+    "youtube": {
+      "id": "XODwpvVl1Us",
+      "privacy": "public"
+    }
   }
 ]
