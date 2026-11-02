@@ -75,5 +75,89 @@
         "gameOver": 1
       }
     }
+  },
+  {
+    "id": "short_002",
+    "createdAt": "2026-11-02T06:06:52.918Z",
+    "file": "short_002_lightning.mp4",
+    "concept": "lightning",
+    "theme": "snow",
+    "seed": 945010610,
+    "time": 14,
+    "hookTpl": "×2 points for 6 seconds ⚡",
+    "hookStyle": "pill",
+    "bioTpl": "👆 Game link in my bio",
+    "bioEndTpl": "▶️ Play free — link in bio!",
+    "ctaTpl": "Think you can do better? 👇",
+    "ctaStyle": "neon",
+    "music": {
+      "style": "arcade_tense",
+      "root": 43,
+      "tempo": 136,
+      "prog": 0,
+      "bassVar": 0,
+      "arpVar": 2,
+      "seed": 1038903263
+    },
+    "bestMode": "fresh",
+    "title": "Score Doubles With This Power-Up ⚡",
+    "titleTpl": "Score Doubles With This Power-Up ⚡",
+    "descIntro": "Whack-a-mole, but with ants (and angry bees) 🐝",
+    "descTips": [
+      "🐝 Smashing a bee costs you 3 points",
+      "🔥 Chain hits to raise your multiplier up to ×8",
+      "🐜 Red ants are faster and worth 2 points"
+    ],
+    "descQuestion": "Did you spot the bee in time? 🐝",
+    "bioLine": "🐜 Play Ant Smash free — link in the channel bio",
+    "hashtags": [
+      "#GamingShorts",
+      "#Challenge",
+      "#ReflexGame",
+      "#SatisfyingGames"
+    ],
+    "tags": [
+      "power up",
+      "double points",
+      "lightning",
+      "lightning power up",
+      "double score",
+      "score boost",
+      "bonus power",
+      "gaming tips",
+      "can you beat my score",
+      "gaming shorts",
+      "shorts game",
+      "play free games",
+      "fun game",
+      "time killer game",
+      "satisfying game",
+      "arcade game",
+      "ant smasher",
+      "smash ants",
+      "whack a mole game",
+      "mini games",
+      "casual games",
+      "mobile games",
+      "free browser game",
+      "free games"
+    ],
+    "result": {
+      "score": 93,
+      "bestMult": 4,
+      "smashed": 21,
+      "taps": 24,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "smashNormal": 19,
+        "smashGold": 2,
+        "combo": 6,
+        "tick": 10,
+        "whiff": 2,
+        "frenzy": 1,
+        "newBest": 1
+      }
+    }
   }
 ]
