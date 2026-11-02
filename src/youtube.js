@@ -82,4 +82,15 @@ async function uploadVideo(file, meta, yt = {}) {
   return { id: j.id, url: `https://youtube.com/shorts/${j.id}`, privacy: (j.status && j.status.privacyStatus) || body.status.privacyStatus, requestedPrivacy: body.status.privacyStatus };
 }
 
-module.exports = { uploadVideo, configured, clean };
+// Sets the custom cover image. YouTube only allows this on channels with "advanced features" (phone verification), so callers treat errors as non-fatal.
+async function setThumbnail(videoId, file) {
+  const token = await accessToken();
+  const data = fs.readFileSync(file);
+  if (data.length > 2 * 1024 * 1024) throw new Error("thumbnail is bigger than 2 MB");
+  const res = await fetch(`https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${encodeURIComponent(videoId)}&uploadType=media`, {
+    method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "image/jpeg", "Content-Length": String(data.length) }, body: data
+  });
+  if (!res.ok) { const t = await res.text(); throw new Error(`thumbnail failed (${res.status}): ${t.slice(0, 300)}`); }
+}
+
+module.exports = { uploadVideo, setThumbnail, configured, clean };

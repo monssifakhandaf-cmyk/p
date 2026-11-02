@@ -93,9 +93,14 @@ async function make() {
             console.log("   ▶️  uploading to YouTube...");
             const up = await yt.uploadVideo(path.join(outDir, file), meta, cfg.youtube || {});
             entry.youtube = { id: up.id, privacy: up.privacy };
+            let thumbNote = "";
+            if (info.thumb) {
+              try { await yt.setThumbnail(up.id, info.thumb); console.log("   ✓ cover image set"); thumbNote = "\n🖼️ Cover image set"; }
+              catch (e) { console.log("   (cover not set: " + e.message + ")"); thumbNote = "\n🖼️ Cover not set: " + e.message.slice(0, 160); }
+            }
             console.log(`   ✓ YouTube: ${up.url} (${up.privacy})`); delivered = true;
             const locked = up.requestedPrivacy !== up.privacy;
-            const note = `▶️ Uploaded to YouTube\n${up.url}\nStatus: ${up.privacy}` + (locked ? "\n⚠️ YouTube kept it " + up.privacy + " (the API project probably has not passed the audit yet). Publish it from YouTube Studio, or request the audit." : "");
+            const note = `▶️ Uploaded to YouTube\n${up.url}\nStatus: ${up.privacy}` + thumbNote + (locked ? "\n⚠️ YouTube kept it " + up.privacy + " (the API project probably has not passed the audit yet). Publish it from YouTube Studio, or request the audit." : "");
             if (has("send")) await sendText(note).catch(() => {});
           } catch (e) {
             console.log("   ✗ YouTube: " + e.message); errors.push("YouTube: " + e.message);

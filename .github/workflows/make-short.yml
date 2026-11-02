@@ -24,7 +24,7 @@ jobs:
           node-version: 20
 
       - name: Install ffmpeg + emoji font
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-noto-color-emoji
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-noto-color-emoji fonts-dejavu-core
 
       - name: Install dependencies
         run: |
@@ -54,6 +54,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: short-${{ github.run_number }}
-          path: out/*.mp4
+          path: |
+            out/*.mp4
+            out/*.jpg
           retention-days: 14
           if-no-files-found: ignore

@@ -9,22 +9,28 @@ const { renderWav } = require("./audio");
 const { fill } = require("./meta");
 const D = require("./data");
 
-// Keeps the game inside YouTube Shorts\' safe zone so the Shorts interface (title, channel, buttons) never covers it:
-// ~110px top, ~420px bottom, ~120px right on the 1080x1920 frame (this page is 540x960, so values are halved).
+// Keeps everything inside the part of the 1080x1920 frame that YouTube Shorts really shows on tall phones.
+// The Shorts player crops the sides (about 55-120px each), and the Shorts interface covers the top (~200px: status bar, search, comments)
+// and the bottom (~530px: channel name, title, like/comment buttons). This page is 540x960, so every value below is half of the real pixel value.
 const SAFE_CSS = `
-body.shorts #app{box-sizing:border-box;padding-top:56px !important;padding-bottom:210px !important}
-body.shorts #field{width:min(440px,90vw) !important;left:-24px}
+body.shorts #app{box-sizing:border-box;padding:100px 72px 300px !important}
+body.shorts #hud{padding-left:0 !important;padding-right:0 !important;gap:6px}
+body.shorts #hud .pill{padding:5px 10px !important;font-size:14px !important}
+body.shorts #barRow{width:100% !important}
+body.shorts #fieldWrap{padding:4px 0 !important}
+body.shorts #field{width:min(396px,100%) !important;left:0 !important}
+body.shorts .overlay{box-sizing:border-box;padding:100px 72px 300px !important}
 `;
 const FX_CSS = `
-.fx{position:fixed;left:50%;transform:translateX(-50%);width:max-content;z-index:9000;pointer-events:none;text-align:center;font-family:'Baloo 2','Nunito','Segoe UI',sans-serif;font-weight:800;line-height:1.12;max-width:500px;animation:fxPop .38s cubic-bezier(.2,.9,.3,1.4) both, fxPulse 1.1s .4s ease-in-out infinite alternate}
+.fx{position:fixed;left:50%;transform:translateX(-50%);width:max-content;z-index:9000;pointer-events:none;text-align:center;font-family:'Baloo 2','Nunito','Segoe UI',sans-serif;font-weight:800;line-height:1.12;max-width:400px;animation:fxPop .38s cubic-bezier(.2,.9,.3,1.4) both, fxPulse 1.1s .4s ease-in-out infinite alternate}
 .fx.out{animation:fxOut .35s ease-in forwards}
-#fxHook{top:112px;font-size:40px}
-#fxCta{top:112px;font-size:36px}
-#fxBio{bottom:215px;left:calc(50% - 24px);font-size:24px;max-width:420px;white-space:normal}
-#fxBio.big{font-size:30px}
+#fxHook{top:196px;font-size:34px}
+#fxCta{top:196px;font-size:32px}
+#fxBio{bottom:272px;font-size:23px;max-width:370px;white-space:normal}
+#fxBio.big{font-size:27px}
 .fx.bio{background:#1f8f3a;color:#fff;border:4px solid #fff;border-radius:30px;padding:10px 18px;box-shadow:0 6px 0 #0d4a1e;text-shadow:0 2px 0 #0d4a1e}
 .fx.pill{background:#3a2717;color:#f6ecd2;border:4px solid #e8b93f;border-radius:30px;padding:12px 24px;box-shadow:0 6px 0 #1c1208}
-.fx.sticker{color:#fff04a;font-size:46px;transform:translateX(-50%) rotate(-3deg);text-shadow:-3px -3px 0 #1c1208,3px -3px 0 #1c1208,-3px 3px 0 #1c1208,3px 3px 0 #1c1208,0 6px 0 #1c1208}
+.fx.sticker{color:#fff04a;font-size:40px;transform:translateX(-50%) rotate(-3deg);text-shadow:-3px -3px 0 #1c1208,3px -3px 0 #1c1208,-3px 3px 0 #1c1208,3px 3px 0 #1c1208,0 6px 0 #1c1208}
 .fx.neon{color:#fff;background:rgba(0,0,0,.5);border-radius:26px;padding:10px 22px;text-shadow:0 0 8px #00e5ff,0 0 22px #00e5ff;border:3px solid #00e5ff;box-shadow:0 0 18px #00e5ff}
 .fx.ribbon{color:#fff;background:linear-gradient(#ff5a4d,#c0392b);padding:12px 40px;clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%);text-shadow:0 3px 0 #7a1d12}
 @keyframes fxPop{0%{opacity:0;margin-top:30px;scale:.5}100%{opacity:1;margin-top:0;scale:1}}
@@ -110,6 +116,26 @@ async function playAndRecord(plan, cfg, framesDir) {
   return { result, frames, endWall };
 }
 
+// Cover image for YouTube: a gameplay frame from the middle of the video + a big "BEAT {score}?" line (needs a bold system font; skipped if none).
+function makeThumb(used, start, end, result, outJpg, cfg, framesDir) {
+  try {
+    const target = start + (end - start) * 0.5;
+    let best = used[0];
+    for (const f of used) if (Math.abs(f.ts - target) < Math.abs(best.ts - target)) best = f;
+    const fonts = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf"];
+    const font = fonts.find((f) => fs.existsSync(f));
+    const W = cfg.outputSize.width, H = cfg.outputSize.height;
+    let vf = `scale=${W}:${H}:flags=lanczos`;
+    if (font) {
+      const txt = path.join(framesDir, "thumb.txt");
+      fs.writeFileSync(txt, `BEAT ${result.score}?`);
+      vf += `,drawtext=fontfile=${font}:textfile=${txt}:fontsize=190:fontcolor=#ffe14a:borderw=14:bordercolor=black:x=(w-text_w)/2:y=${Math.round(H * 0.22)}`;
+    }
+    run("ffmpeg", ["-y", "-v", "error", "-i", best.file, "-vf", vf, "-frames:v", "1", "-q:v", "3", outJpg]);
+    return fs.existsSync(outJpg) ? outJpg : null;
+  } catch (e) { console.log("   (thumbnail skipped: " + e.message.split("\n")[0] + ")"); return null; }
+}
+
 function finalize(plan, result, frames, endWall, outFile, cfg, framesDir) {
   const firstCount = result.log.find((e) => e.k === "count");
   const start = firstCount.wall - 60;                       // video starts right when the 3-2-1 begins
@@ -141,7 +167,8 @@ function finalize(plan, result, frames, endWall, outFile, cfg, framesDir) {
     "-c:v", "libx264", "-preset", "medium", "-profile:v", "high", "-crf", String(cfg.crf || 20), "-maxrate", cfg.maxrate || "8M", "-bufsize", cfg.bufsize || "16M",
     "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-t", Math.min(dur, cfg.videoSeconds || 20).toFixed(3), "-movflags", "+faststart", outFile]);
   fs.unlinkSync(wavFile);
-  return { duration: Math.min(dur, cfg.videoSeconds || 20), capturedFps: fps };
+  const thumb = makeThumb(used, start, end, result, outFile.replace(/\.mp4$/, ".jpg"), cfg, framesDir);
+  return { duration: Math.min(dur, cfg.videoSeconds || 20), capturedFps: fps, thumb };
 }
 
-module.exports = { playAndRecord, finalize };
+module.exports = { playAndRecord, finalize, FX_CSS, SAFE_CSS, showText };

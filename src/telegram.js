@@ -50,4 +50,15 @@ async function sendText(text) {
   await call(token, "sendMessage", msg);
 }
 
-module.exports = { sendVideo, sendText };
+async function sendPhoto(file, caption) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chat = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chat) throw new Error("Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID.");
+  const form = new FormData();
+  form.append("chat_id", chat);
+  if (caption) form.append("caption", String(caption).slice(0, 1000));
+  form.append("photo", new Blob([fs.readFileSync(file)], { type: "image/jpeg" }), path.basename(file));
+  await call(token, "sendPhoto", form);
+}
+
+module.exports = { sendVideo, sendText, sendPhoto };
