@@ -336,5 +336,93 @@
       "id": "XODwpvVl1Us",
       "privacy": "public"
     }
+  },
+  {
+    "id": "short_005",
+    "createdAt": "2026-11-05T22:45:05.254Z",
+    "file": "short_005_noob.mp4",
+    "concept": "noob",
+    "theme": "garden",
+    "seed": 1919269838,
+    "time": 14,
+    "hookTpl": "Beginner mode: activated 🐣",
+    "hookStyle": "neon",
+    "bioTpl": "Want to play? Link in bio 🎮",
+    "bioEndTpl": "🐜 Your turn! Link in bio 👆",
+    "ctaTpl": "Score to beat: {score} — game in bio 🔗",
+    "ctaStyle": "ribbon",
+    "music": {
+      "style": "chip_bounce",
+      "root": 49,
+      "tempo": 134,
+      "prog": 0,
+      "bassVar": 1,
+      "arpVar": 0,
+      "seed": 511745092
+    },
+    "bestMode": "fresh",
+    "title": "Can You Beat a Beginner? (33 Points) 😏",
+    "titleTpl": "Can You Beat a Beginner? ({score} Points) 😏",
+    "descIntro": "Ant Smash is a fast reflex game — how long can you keep the combo alive?",
+    "descTips": [
+      "⚡ Lightning gives double points for 6 seconds",
+      "⏱️ Clocks add 5 extra seconds",
+      "✨ Golden ants are worth 5 points"
+    ],
+    "descQuestion": "What would you score in this round? 🤔",
+    "bioLine": "📲 Play on your phone or PC: link in my bio",
+    "hashtags": [
+      "#GamerLife",
+      "#PlayFree",
+      "#GameChallenge",
+      "#TimeKiller"
+    ],
+    "tags": [
+      "funny",
+      "fail",
+      "bad reflexes",
+      "beginner",
+      "noob",
+      "funny gaming",
+      "game fail",
+      "easy score",
+      "reaction fail",
+      "bee game",
+      "ant game",
+      "bug game",
+      "insect game",
+      "combo game",
+      "power up game",
+      "reaction speed test",
+      "click speed test",
+      "tap speed",
+      "aim game",
+      "reflex training",
+      "brain game",
+      "hand eye coordination",
+      "challenge",
+      "game challenge",
+      "gaming challenge"
+    ],
+    "result": {
+      "score": 33,
+      "bestMult": 2,
+      "smashed": 17,
+      "taps": 39,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "whiff": 21,
+        "smashNormal": 17,
+        "combo": 4,
+        "tick": 10,
+        "frenzy": 1,
+        "newBest": 1
+      }
+    },
+    "youtube": {
+      "id": "Dj6CLCMgU-k",
+      "privacy": "public"
+    }
   }
 ]
