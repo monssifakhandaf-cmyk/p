@@ -424,5 +424,93 @@
       "id": "Dj6CLCMgU-k",
       "privacy": "public"
     }
+  },
+  {
+    "id": "short_006",
+    "createdAt": "2026-11-06T22:14:34.359Z",
+    "file": "short_006_speed_demon.mp4",
+    "concept": "speed_demon",
+    "theme": "candy",
+    "seed": 647075080,
+    "time": 14,
+    "hookTpl": "Can your finger do this? 🖐️",
+    "hookStyle": "pill",
+    "bioTpl": "🔗 Play free: link in bio",
+    "bioEndTpl": "🎮 Tap my bio to play now!",
+    "ctaTpl": "Play FREE now — link in bio 🔗",
+    "ctaStyle": "neon",
+    "music": {
+      "style": "epic_run",
+      "root": 50,
+      "tempo": 154,
+      "prog": 1,
+      "bassVar": 0,
+      "arpVar": 1,
+      "seed": 1649912580
+    },
+    "bestMode": "chase",
+    "title": "Ant Smash Turbo Run ⚡",
+    "titleTpl": "Ant Smash Turbo Run ⚡",
+    "descIntro": "Think your reflexes are better than mine? Prove it 🧠",
+    "descTips": [
+      "🐝 Smashing a bee costs you 3 points",
+      "🔥 Chain hits to raise your multiplier up to ×8",
+      "🐜 Red ants are faster and worth 2 points"
+    ],
+    "descQuestion": "Want more runs like this? Let me know 👇",
+    "bioLine": "🔗 Free game link in my bio — come and beat my score!",
+    "hashtags": [
+      "#QuickGame",
+      "#FunGames",
+      "#GamingCommunity",
+      "#ComboChallenge"
+    ],
+    "tags": [
+      "speed",
+      "fast reflexes",
+      "reaction time",
+      "speed run",
+      "fast fingers",
+      "reaction time test",
+      "turbo",
+      "reflex challenge",
+      "cps test",
+      "score challenge",
+      "viral game",
+      "trending game",
+      "new game",
+      "cute game",
+      "colorful game",
+      "relaxing game",
+      "stress relief game",
+      "easy game",
+      "simple game",
+      "fun mobile game",
+      "best free game",
+      "top free games",
+      "ant smash",
+      "ant smash game",
+      "whack a mole"
+    ],
+    "result": {
+      "score": 59,
+      "bestMult": 4,
+      "smashed": 18,
+      "taps": 58,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "whiff": 39,
+        "smashNormal": 18,
+        "combo": 5,
+        "tick": 10,
+        "frenzy": 1,
+        "gameOver": 1
+      }
+    },
+    "youtube": {
+      "id": "Oy5918rY8LI",
+      "privacy": "public"
+    }
   }
 ]
