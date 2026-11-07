@@ -5,13 +5,8 @@ const { lruPick, similarity, shuffle, pickRandom } = require("./planner");
 
 const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => (v[k] !== undefined ? v[k] : "{" + k + "}"));
 
-function buildMeta(plan, result, history) {
-  const C = D.CONCEPTS[plan.concept];
-  const vars = {
-    score: result.score, combo: result.bestMult, time: plan.time,
-    rush: plan.bot.rush ? plan.bot.rush.sec : 8,
-    target: Math.max(10, Math.round((result.score + 8) / 5) * 5)
-  };
+// lib = the game's text library (DESC_INTROS, DESC_TIPS, DESC_QUESTIONS, HASHTAGS, BIO_LINES, TAG_POOL); C = the concept (titles, desc, tags)
+function buildMetaGeneric(lib, C, vars, history) {
   const used = (f) => history.map(f);
 
   // ----- title: avoid exact repeats and anything too similar to the last 40 titles -----
@@ -25,23 +20,32 @@ function buildMeta(plan, result, history) {
   const title = pool.find((c) => c.tpl === tpl).text;
 
   // ----- description -----
-  const intro = lruPick(D.DESC_INTROS, used((e) => e.descIntro));
+  const intro = lruPick(lib.DESC_INTROS, used((e) => e.descIntro));
   const conceptLine = fill(pickRandom(C.desc), vars);
   const tipsUsed = used((e) => e.descTips || []).flat();
-  const tips = D.DESC_TIPS.slice().sort((a, b) => tipsUsed.lastIndexOf(a) - tipsUsed.lastIndexOf(b)).slice(0, 3);
-  const question = fill(lruPick(D.DESC_QUESTIONS, used((e) => e.descQuestion)), vars);
+  const tips = lib.DESC_TIPS.slice().sort((a, b) => tipsUsed.lastIndexOf(a) - tipsUsed.lastIndexOf(b)).slice(0, 3);
+  const question = fill(lruPick(lib.DESC_QUESTIONS, used((e) => e.descQuestion)), vars);
   const hashUsed = used((e) => e.hashtags || []).flat();
-  const hashtags = ["#Shorts"].concat(D.HASHTAGS.slice().sort((a, b) => hashUsed.lastIndexOf(a) - hashUsed.lastIndexOf(b)).slice(0, 4));
-  const bioLine = lruPick(D.BIO_LINES, used((e) => e.bioLine));
+  const hashtags = ["#Shorts"].concat(lib.HASHTAGS.slice().sort((a, b) => hashUsed.lastIndexOf(a) - hashUsed.lastIndexOf(b)).slice(0, 4));
+  const bioLine = lruPick(lib.BIO_LINES, used((e) => e.bioLine));
   const description = [bioLine, "", intro, "", conceptLine, "", shuffle(tips).join("\n"), "", question, "", hashtags.join(" ")].join("\n");
 
   // ----- tags (YouTube allows ~500 characters) -----
   const tagUsed = used((e) => e.tags || []).flat();
-  const extra = D.TAG_POOL.slice().sort((a, b) => tagUsed.lastIndexOf(a) - tagUsed.lastIndexOf(b)).slice(0, 16);
+  const extra = lib.TAG_POOL.slice().sort((a, b) => tagUsed.lastIndexOf(a) - tagUsed.lastIndexOf(b)).slice(0, 16);
   let tags = [];
   for (const t of [...C.tags, ...extra]) { if (tags.join(",").length + t.length + 1 < 480 && !tags.includes(t)) tags.push(t); }
 
-  return { title, titleTpl: tpl, bioLine, description, tags, descIntro: intro, descTips: tips, descQuestion: D.DESC_QUESTIONS.find((q) => fill(q, vars) === question) || question, hashtags: hashtags.slice(1) };
+  return { title, titleTpl: tpl, bioLine, description, tags, descIntro: intro, descTips: tips, descQuestion: lib.DESC_QUESTIONS.find((q) => fill(q, vars) === question) || question, hashtags: hashtags.slice(1) };
 }
 
-module.exports = { buildMeta, fill };
+function buildMeta(plan, result, history) {
+  const vars = {
+    score: result.score, combo: result.bestMult, time: plan.time,
+    rush: plan.bot.rush ? plan.bot.rush.sec : 8,
+    target: Math.max(10, Math.round((result.score + 8) / 5) * 5)
+  };
+  return buildMetaGeneric(D, D.CONCEPTS[plan.concept], vars, history);
+}
+
+module.exports = { buildMeta, buildMetaGeneric, fill };

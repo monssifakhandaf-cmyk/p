@@ -53,6 +53,11 @@ const SFX = {
   go: (t, at) => t.tone(at, 880, 0.25, "sine", 0.25, 1320),
   whiff: (t, at) => t.tone(at, 90, 0.06, "sine", 0.1, 60),
   gameOver: (t, at) => { t.tone(at, 300, 0.2, "sine", 0.2, 180); t.tone(at + 0.15, 200, 0.3, "sine", 0.2, 100); },
+  // Neon Tower sounds (same recipes as that game's beep() calls)
+  ntPerfect: (t, at, a) => t.tone(at, 330 * Math.pow(2, Math.min((a[0] || 1) * 2, 16) / 12), 0.22, "triangle", 0.2),
+  ntPlace: (t, at) => t.tone(at, 190, 0.1, "square", 0.09),
+  ntZone: (t, at) => { t.tone(at, 660, 0.3, "sine", 0.14); t.tone(at + 0.12, 990, 0.4, "sine", 0.12); },
+  ntOver: (t, at) => { t.tone(at, 160, 0.5, "sawtooth", 0.18); t.tone(at + 0.12, 90, 0.6, "sawtooth", 0.18); },
   newBest: (t, at) => [523, 659, 784, 1047].forEach((f, i) => t.tone(at + i * 0.11, f, 0.16, "triangle", 0.2, f * 1.02))
 };
 

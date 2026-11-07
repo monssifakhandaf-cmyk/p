@@ -128,7 +128,7 @@ function makeThumb(used, start, end, result, outJpg, cfg, framesDir) {
     let vf = `scale=${W}:${H}:flags=lanczos`;
     if (font) {
       const txt = path.join(framesDir, "thumb.txt");
-      fs.writeFileSync(txt, `BEAT ${result.score}?`);
+      fs.writeFileSync(txt, result.thumbText || `BEAT ${result.score}?`);
       vf += `,drawtext=fontfile=${font}:textfile=${txt}:fontsize=190:fontcolor=#ffe14a:borderw=14:bordercolor=black:x=(w-text_w)/2:y=${Math.round(H * 0.22)}`;
     }
     run("ffmpeg", ["-y", "-v", "error", "-i", best.file, "-vf", vf, "-frames:v", "1", "-q:v", "3", outJpg]);

@@ -32,7 +32,8 @@ async function sendVideo(file, meta, dims = {}) {
   await call(token, "sendVideo", form);
 
   // second message: everything needed to paste into YouTube
-  const text = `TITLE:\n${meta.title}\n\nDESCRIPTION:\n${meta.description}\n\nTAGS:\n${meta.tags.join(", ")}`.slice(0, 4000);
+  const head = (meta.gameName ? `GAME: ${meta.gameName}` : "") + (meta.kind === "main" ? "  (MAIN VIDEO, landscape)" : "");
+  const text = ((head ? head + "\n\n" : "") + `TITLE:\n${meta.title}\n\nDESCRIPTION:\n${meta.description}\n\nTAGS:\n${meta.tags.join(", ")}` + (meta.note ? "\n\n" + meta.note : "")).slice(0, 4000);
   const msg = new FormData();
   msg.append("chat_id", chat);
   msg.append("text", text);

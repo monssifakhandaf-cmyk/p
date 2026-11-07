@@ -26,5 +26,23 @@
     "privacy": "public",
     "language": "en"
   },
-  "safeZone": true
+  "safeZone": true,
+  "games": {
+    "antsmash": {
+      "name": "Ant Smash",
+      "url": "https://killingants.pages.dev",
+      "enabled": true
+    },
+    "neontower": {
+      "name": "Neon Tower",
+      "url": "https://skylinerush.pages.dev",
+      "path": "games/neontower/index.html",
+      "enabled": true
+    }
+  },
+  "main": {
+    "count": 2,
+    "badge": "🎮 Play FREE — link in the description 👇",
+    "end": "👇 Play FREE — link in the description!"
+  }
 }
