@@ -683,5 +683,87 @@
       "id": "J_exo7s8gIA",
       "privacy": "public"
     }
+  },
+  {
+    "id": "neontower_short_002",
+    "createdAt": "2026-11-07T20:55:32.613Z",
+    "game": "neontower",
+    "kind": "short",
+    "concept": "perfect_streak",
+    "seed": 1699259690,
+    "time": 14,
+    "hookTpl": "Timing is everything ⏱️",
+    "hookStyle": "ribbon",
+    "bioTpl": "Free game → link in bio 🔗",
+    "bioEndTpl": "🏆 Beat my floors — link in bio!",
+    "ctaTpl": "Can you stack higher? Link in bio 🏙️",
+    "ctaStyle": "neon",
+    "music": {
+      "style": "sunny_pop",
+      "root": 50,
+      "tempo": 112,
+      "prog": 2,
+      "bassVar": 2,
+      "arpVar": 2,
+      "seed": 239258388
+    },
+    "bestMode": "chase",
+    "title": "Perfect Combo ×21 — Neon Tower 🔥",
+    "titleTpl": "Perfect Combo ×{combo} — Neon Tower 🔥",
+    "descIntro": "Can you stack a perfect tower? 🎯",
+    "descTips": [
+      "🛰️ Satellites appear around floor 40",
+      "🪐 Mars, Saturn and Jupiter wait far above",
+      "🌇 The sky changes from sunset to space as you climb"
+    ],
+    "descQuestion": "How many floors can you build? Tell me in the comments 👇",
+    "bioLine": "🔗 Free tower game link in my bio — beat my floors!",
+    "hashtags": [
+      "#MobileGame",
+      "#CasualGames",
+      "#GamingShorts",
+      "#Challenge"
+    ],
+    "tags": [
+      "perfect timing",
+      "stacking game",
+      "tower stack",
+      "perfect stack",
+      "timing game",
+      "satisfying game",
+      "casual game",
+      "casual games",
+      "mobile game",
+      "mobile games",
+      "browser game",
+      "free browser game",
+      "free online game",
+      "free games",
+      "free game no download",
+      "play free games",
+      "no download game",
+      "html5 game",
+      "addictive game",
+      "addictive games",
+      "high score",
+      "high score challenge"
+    ],
+    "result": {
+      "score": 22,
+      "bestCombo": 21,
+      "perfects": 21,
+      "counts": {
+        "count": 1,
+        "ntPerfect": 21,
+        "ntZone": 1,
+        "ntPlace": 1,
+        "ntOver": 1
+      }
+    },
+    "file": "neontower_short_002_perfect_streak.mp4",
+    "youtube": {
+      "id": "pxGTe9IcCzo",
+      "privacy": "public"
+    }
   }
 ]
