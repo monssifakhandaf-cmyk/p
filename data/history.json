@@ -765,5 +765,93 @@
       "id": "pxGTe9IcCzo",
       "privacy": "public"
     }
+  },
+  {
+    "id": "antsmash_short_008",
+    "createdAt": "2026-11-07T21:00:42.579Z",
+    "game": "antsmash",
+    "kind": "short",
+    "concept": "gold_rush",
+    "theme": "snow",
+    "seed": 1554302576,
+    "time": 14,
+    "hookTpl": "Spot the golden ant ✨🐜",
+    "hookStyle": "ribbon",
+    "bioTpl": "🐜 Play Ant Smash — link in bio",
+    "bioEndTpl": "▶️ Play free — link in bio!",
+    "ctaTpl": "Tell me your best score 👇",
+    "ctaStyle": "sticker",
+    "music": {
+      "style": "sunny_pop",
+      "root": 40,
+      "tempo": 107,
+      "prog": 0,
+      "bassVar": 0,
+      "arpVar": 0,
+      "seed": 1941384162
+    },
+    "bestMode": "fresh",
+    "title": "The Rarest Ant in the Game ✨🐜",
+    "titleTpl": "The Rarest Ant in the Game ✨🐜",
+    "descIntro": "Tap fast, think faster. Welcome to Ant Smash!",
+    "descTips": [
+      "🔥 Don't break your combo, it's worth more than speed",
+      "✨ Golden ants disappear fast: tap them first",
+      "🐜 Normal ants are worth 1 point each"
+    ],
+    "descQuestion": "Rate my reflexes from 1 to 10 👇",
+    "bioLine": "👆 Tap my profile bio to play Ant Smash for free 🎮",
+    "hashtags": [
+      "#CasualGaming",
+      "#IndieGame",
+      "#AntSmash",
+      "#MiniGame"
+    ],
+    "tags": [
+      "golden ant",
+      "rare",
+      "5 points",
+      "rare ant",
+      "treasure hunt",
+      "gold rush",
+      "shiny",
+      "play free games",
+      "fun game",
+      "time killer game",
+      "satisfying game",
+      "arcade game",
+      "ant smasher",
+      "smash ants",
+      "whack a mole game",
+      "mini games",
+      "casual games",
+      "mobile games",
+      "free browser game",
+      "free games",
+      "free game no download",
+      "no download game",
+      "html5 game"
+    ],
+    "result": {
+      "score": 78,
+      "bestMult": 5,
+      "smashed": 20,
+      "taps": 28,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "smashNormal": 18,
+        "whiff": 8,
+        "combo": 6,
+        "tick": 10,
+        "smashGold": 2,
+        "newBest": 1
+      }
+    },
+    "file": "antsmash_short_008_gold_rush.mp4",
+    "youtube": {
+      "id": "3bvb_bXAoes",
+      "privacy": "public"
+    }
   }
 ]
