@@ -512,5 +512,83 @@
       "id": "Oy5918rY8LI",
       "privacy": "public"
     }
+  },
+  {
+    "id": "neontower_short_001",
+    "createdAt": "2026-11-07T16:45:20.976Z",
+    "game": "neontower",
+    "kind": "short",
+    "concept": "comeback",
+    "seed": 859557772,
+    "time": 14,
+    "hookTpl": "Redemption run 🏆",
+    "hookStyle": "sticker",
+    "bioTpl": "🚀 Stack to the stars — link in bio",
+    "bioEndTpl": "👆 Play FREE — link in bio!",
+    "ctaTpl": "Stack higher than {score}! Link in bio 🚀",
+    "ctaStyle": "pill",
+    "music": {
+      "style": "arcade_tense",
+      "root": 49,
+      "tempo": 150,
+      "prog": 1,
+      "bassVar": 2,
+      "arpVar": 2,
+      "seed": 113355544
+    },
+    "bestMode": "fresh",
+    "title": "Comeback Run: 14 Perfect Taps at the End 🔥",
+    "titleTpl": "Comeback Run: {combo} Perfect Taps at the End 🔥",
+    "descIntro": "Neon Tower: easy to learn, hard to master 🏙️",
+    "descTips": [
+      "🎯 Tap when the moving floor lines up with the tower for a Perfect",
+      "🔥 Four perfects in a row make your floor wider again",
+      "☁️ Reach 12 floors for the Cloud layer"
+    ],
+    "descQuestion": "Want more tower runs? Let me know 👇",
+    "bioLine": "👆 Tap my profile bio to play Neon Tower for free 🎮",
+    "hashtags": [
+      "#NeonTower",
+      "#TowerGame",
+      "#StackGame",
+      "#TimingGame"
+    ],
+    "tags": [
+      "comeback",
+      "redemption",
+      "stacking game",
+      "tower stack",
+      "perfect timing",
+      "skill game",
+      "neon tower",
+      "neon tower game",
+      "tower game",
+      "stack game",
+      "stack the tower",
+      "build a tower",
+      "skyscraper game",
+      "timing game",
+      "tap timing",
+      "tap game",
+      "tapping game",
+      "mini game",
+      "mini games"
+    ],
+    "result": {
+      "score": 21,
+      "bestCombo": 14,
+      "perfects": 15,
+      "counts": {
+        "count": 1,
+        "ntPerfect": 15,
+        "ntPlace": 6,
+        "ntZone": 1
+      }
+    },
+    "file": "neontower_short_001_comeback.mp4",
+    "youtube": {
+      "id": "3cPePq4_RlI",
+      "privacy": "public"
+    }
   }
 ]
