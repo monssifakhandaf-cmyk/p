@@ -590,5 +590,98 @@
       "id": "3cPePq4_RlI",
       "privacy": "public"
     }
+  },
+  {
+    "id": "antsmash_short_007",
+    "createdAt": "2026-11-07T17:06:29.286Z",
+    "game": "antsmash",
+    "kind": "short",
+    "concept": "bee_fail",
+    "theme": "desert",
+    "seed": 1650346570,
+    "time": 14,
+    "hookTpl": "So close to a perfect run 😩",
+    "hookStyle": "sticker",
+    "bioTpl": "🎮 Play FREE — link in bio 🔗",
+    "bioEndTpl": "🏆 Beat my score — link in bio!",
+    "ctaTpl": "Beat {score} and comment 👇 Game in bio 🎮",
+    "ctaStyle": "pill",
+    "music": {
+      "style": "arcade_tense",
+      "root": 42,
+      "tempo": 143,
+      "prog": 1,
+      "bassVar": 1,
+      "arpVar": 1,
+      "seed": 581262253
+    },
+    "bestMode": "chase",
+    "title": "Never Tap the Bee! 🐝",
+    "titleTpl": "Never Tap the Bee! 🐝",
+    "descIntro": "Fun, fast and free to play 🎮",
+    "descTips": [
+      "🎯 Every 4 hits in a row raises your multiplier",
+      "👀 Watch out: bees look similar when you're rushing",
+      "⚡ Grab the lightning early to get the most out of it"
+    ],
+    "descQuestion": "Be honest: could you beat {score}? 😏",
+    "bioLine": "👉 Game link? It's in my bio, no download needed",
+    "hashtags": [
+      "#AddictiveGames",
+      "#GameOfTheDay",
+      "#TapToPlay",
+      "#ReflexChallenge"
+    ],
+    "tags": [
+      "bee",
+      "fail",
+      "funny game moments",
+      "bee trap",
+      "epic fail",
+      "funny fail",
+      "rage game",
+      "game fail",
+      "wrong tap",
+      "combo broken",
+      "whack an ant",
+      "smash ants game",
+      "mini game",
+      "casual game",
+      "mobile game",
+      "browser game",
+      "free online game",
+      "free game",
+      "addictive game",
+      "tap game",
+      "reflex game",
+      "reaction game",
+      "high score challenge",
+      "can you beat my score",
+      "gaming shorts",
+      "shorts game"
+    ],
+    "result": {
+      "score": 79,
+      "bestMult": 4,
+      "smashed": 24,
+      "taps": 28,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "frenzy": 1,
+        "smashGold": 2,
+        "whiff": 2,
+        "smashNormal": 22,
+        "combo": 7,
+        "tick": 10,
+        "smashBee": 1,
+        "gameOver": 1
+      }
+    },
+    "file": "antsmash_short_007_bee_fail.mp4",
+    "youtube": {
+      "id": "J_exo7s8gIA",
+      "privacy": "public"
+    }
   }
 ]
