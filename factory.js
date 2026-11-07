@@ -4,7 +4,6 @@
   Shorts Factory (Ant Smash + Neon Tower)
     node factory.js make --send --upload                make 1 Short (the two games alternate), send it to Telegram and upload it to YouTube
     node factory.js make --game neontower --count 3     make 3 Shorts of one game
-    node factory.js main --game both --count 2 --send --upload   make the landscape "main videos" (the description holds the game link)
     node factory.js plan --count 5                      show what would be made (no recording)
     node factory.js report                              variety report of everything made so far
 */
@@ -14,7 +13,6 @@ const cfg = require("./config.json");
 const planner = require("./src/planner");
 const { finalize } = require("./src/record");
 const games = require("./src/games");
-const MV = require("./src/main_video");
 const { sendVideo, sendText } = require("./src/telegram");
 const yt = require("./src/youtube");
 
@@ -62,8 +60,8 @@ async function deliver(file, meta, info, entry, dims) {
         }
         console.log(`   ✓ YouTube: ${up.url} (${up.privacy})`); delivered = true;
         const locked = up.requestedPrivacy !== up.privacy;
-        const link = meta.kind === "main" ? `https://youtu.be/${up.id}` : up.url;
-        const note = `▶️ Uploaded to YouTube${meta.kind === "main" ? " (main video)" : ""}\n${link}\nStatus: ${up.privacy}` + thumbNote + (locked ? "\n⚠️ YouTube kept it " + up.privacy + " (the API project probably has not passed the audit yet). Publish it from YouTube Studio." : "");
+        const link = up.url;
+        const note = `▶️ Uploaded to YouTube\n${link}\nStatus: ${up.privacy}` + thumbNote + (locked ? "\n⚠️ YouTube kept it " + up.privacy + " (the API project probably has not passed the audit yet). Publish it from YouTube Studio." : "");
         if (has("send")) await sendText(note).catch(() => {});
       } catch (e) {
         console.log("   ✗ YouTube: " + e.message); errors.push("YouTube: " + e.message);
@@ -129,58 +127,8 @@ async function make() {
   console.log("\n" + planner.report(planner.loadHistory(historyFile).filter((e) => kindOf(e) === "short"), cfg));
 }
 
-// Landscape main videos: the description holds the clickable game link.
-async function main() {
-  const count = parseInt(opt("count", String((cfg.main || {}).count || 2)), 10);
-  const which = opt("game", "both");
-  const ids = which === "both" ? enabled() : [which];
-  let history = planner.loadHistory(historyFile);
-  fs.mkdirSync(outDir, { recursive: true });
-
-  for (const gid of ids) {
-    const A = games[gid]; const G = cfg.games[gid] || {};
-    if (!A) throw new Error("Unknown game: " + gid);
-    if (!G.url) { console.log(`\n⏭️  ${A.name}: no URL in config.json (games.${gid}.url). The main video needs the game link; skipping.`); process.exitCode = 1; continue; }
-    for (let n = 0; n < count; n++) {
-      const mainHist = history.filter((e) => gameOf(e) === gid && kindOf(e) === "main");
-      const id = `${gid}_main_${pad(mainHist.length + 1)}`;
-      let { plan, cfg2 } = MV.makePlan(A, gid, mainHist, cfg);
-      let done = false;
-      for (let attempt = 1; attempt <= 4 && !done; attempt++) {
-        console.log(`\n🎞️  ${id} [${A.name}] main video (attempt ${attempt})\n   ${A.describe(plan)}`);
-        const rawDir = path.join(outDir, ".raw", id);
-        let rec;
-        try { rec = await A.playAndRecord(plan, cfg2, rawDir); }
-        catch (e) { console.log("   ✗ recording failed: " + e.message.split("\n")[0]); plan = A.reseed(plan, mainHist); continue; }
-        const { result, frames, endWall } = rec;
-        const ok = result.score >= MV.MAIN[gid].minScore;
-        console.log(`   result: ${A.summary(result)} ${ok ? "✓" : "✗ too low for a main video, retrying"}`);
-        if (!ok) { fs.rmSync(rawDir, { recursive: true, force: true }); plan = A.reseed(plan, mainHist); continue; }
-
-        const portrait = path.join(outDir, `${id}_portrait.mp4`);
-        const info = finalize(plan, result, frames, endWall, portrait, cfg2, rawDir);
-        const file = path.join(outDir, `${id}.mp4`);
-        MV.toLandscape(portrait, file);
-        fs.rmSync(portrait, { force: true });
-        info.thumb = MV.makeThumb(file, path.join(outDir, `${id}.jpg`), MV.MAIN[gid].thumbText(result), info.duration);
-        const meta = MV.buildMainMeta(gid, A.name, G.url, plan, result, mainHist);
-        const entry = { ...baseEntry(id, plan, meta, result), file: path.basename(file), kind: "main" };
-        await deliver(file, meta, info, entry, { width: 1920, height: 1080 });
-        history.push(entry);
-        planner.saveHistory(historyFile, history);
-        fs.writeFileSync(path.join(outDir, `${id}.txt`), `GAME: ${A.name} (MAIN VIDEO)\nTITLE:\n${meta.title}\n\nDESCRIPTION:\n${meta.description}\n\nTAGS:\n${meta.tags.join(", ")}\n`);
-        fs.rmSync(path.join(outDir, ".raw"), { recursive: true, force: true });
-        console.log(`   ✅ ${path.basename(file)} (${info.duration.toFixed(1)}s)\n   📝 ${meta.title}`);
-        done = true;
-      }
-      if (!done) { console.log(`   ⛔ could not make a valid ${id}; skipping.`); process.exitCode = 1; }
-    }
-  }
-}
-
 (async () => {
   if (cmd === "make") return make();
-  if (cmd === "main") return main();
   if (cmd === "plan") {
     const count = parseInt(opt("count", "6"), 10);
     let history = planner.loadHistory(historyFile).slice();
@@ -194,5 +142,5 @@ async function main() {
     return;
   }
   if (cmd === "report") return console.log(planner.report(planner.loadHistory(historyFile).filter((e) => kindOf(e) === "short"), cfg));
-  console.log("Usage:\n  node factory.js make [--count N] [--game antsmash|neontower] [--concept id] [--send] [--upload]\n  node factory.js main [--game both|antsmash|neontower] [--count N] [--send] [--upload]\n  node factory.js plan [--count N]\n  node factory.js report\n\nGames: " + Object.keys(games).join(", "));
+  console.log("Usage:\n  node factory.js make [--count N] [--game antsmash|neontower] [--concept id] [--send] [--upload]\n  node factory.js plan [--count N]\n  node factory.js report\n\nGames: " + Object.keys(games).join(", "));
 })().catch((e) => { console.error(e); process.exit(1); });
