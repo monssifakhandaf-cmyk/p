@@ -853,5 +853,87 @@
       "id": "3bvb_bXAoes",
       "privacy": "public"
     }
+  },
+  {
+    "id": "neontower_short_003",
+    "createdAt": "2026-11-08T21:17:17.233Z",
+    "game": "neontower",
+    "kind": "short",
+    "concept": "thin_tower",
+    "seed": 1512477032,
+    "time": 14,
+    "hookTpl": "Almost nothing to stand on 😰",
+    "hookStyle": "neon",
+    "bioTpl": "🔗 Play free: link in bio",
+    "bioEndTpl": "🏙️ Tap my bio to play now!",
+    "ctaTpl": "Your turn! Neon Tower — link in bio 🔗",
+    "ctaStyle": "ribbon",
+    "music": {
+      "style": "epic_run",
+      "root": 46,
+      "tempo": 144,
+      "prog": 2,
+      "bassVar": 0,
+      "arpVar": 2,
+      "seed": 60161992
+    },
+    "bestMode": "chase",
+    "title": "From a Tiny Base to 22 Floors 🚀",
+    "titleTpl": "From a Tiny Base to {score} Floors 🚀",
+    "descIntro": "A satisfying little stacking game ✨",
+    "descTips": [
+      "⚡ The floor gets faster the higher you build",
+      "👀 Watch the width: tiny floors are harder to land",
+      "🎯 Tap when the moving floor lines up with the tower for a Perfect"
+    ],
+    "descQuestion": "Tag a friend who thinks their timing is perfect 👇",
+    "bioLine": "▶️ Want to play? The Neon Tower link is in my bio 🔗",
+    "hashtags": [
+      "#SatisfyingGames",
+      "#FreeGames",
+      "#GameShorts",
+      "#TapGame"
+    ],
+    "tags": [
+      "clutch",
+      "comeback",
+      "close call",
+      "stacking game",
+      "tower stack",
+      "skill game",
+      "can you beat my score",
+      "beat my score",
+      "gaming shorts",
+      "shorts game",
+      "game shorts",
+      "satisfying games",
+      "arcade game",
+      "arcade games",
+      "quick game",
+      "short game",
+      "one minute game",
+      "game for android",
+      "game for iphone",
+      "phone game",
+      "indie game",
+      "indie game dev"
+    ],
+    "result": {
+      "score": 22,
+      "bestCombo": 16,
+      "perfects": 17,
+      "counts": {
+        "count": 1,
+        "ntPerfect": 17,
+        "ntPlace": 5,
+        "ntZone": 1,
+        "ntOver": 1
+      }
+    },
+    "file": "neontower_short_003_thin_tower.mp4",
+    "youtube": {
+      "id": "EWIoBvEA-Rk",
+      "privacy": "public"
+    }
   }
 ]
