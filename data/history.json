@@ -935,5 +935,91 @@
       "id": "EWIoBvEA-Rk",
       "privacy": "public"
     }
+  },
+  {
+    "id": "antsmash_short_009",
+    "createdAt": "2026-11-12T22:50:07.126Z",
+    "game": "antsmash",
+    "kind": "short",
+    "concept": "guess_score",
+    "theme": "night",
+    "seed": 1710336401,
+    "time": 14,
+    "hookTpl": "Guess my final score 👇",
+    "hookStyle": "neon",
+    "bioTpl": "👆 Game link in my bio",
+    "bioEndTpl": "🔗 Game link is in my bio!",
+    "ctaTpl": "Closest to {score} wins the glory 🏆👇",
+    "ctaStyle": "ribbon",
+    "music": {
+      "style": "funk_groove",
+      "root": 46,
+      "tempo": 99,
+      "prog": 2,
+      "bassVar": 0,
+      "arpVar": 0,
+      "seed": 191397733
+    },
+    "bestMode": "chase",
+    "title": "Guess, Then Beat It! 🏆",
+    "titleTpl": "Guess, Then Beat It! 🏆",
+    "descIntro": "Sharpen your reflexes with a quick round of Ant Smash!",
+    "descTips": [
+      "⚡ Lightning gives double points for 6 seconds",
+      "⏱️ Clocks add 5 extra seconds",
+      "✨ Golden ants are worth 5 points"
+    ],
+    "descQuestion": "What's your best score? Tell me in the comments 👇",
+    "bioLine": "🔥 Join the challenge! Free game link in my bio",
+    "hashtags": [
+      "#MobileGame",
+      "#CasualGames",
+      "#GamingShorts",
+      "#Challenge"
+    ],
+    "tags": [
+      "guess",
+      "prediction",
+      "challenge",
+      "guess the score",
+      "comment challenge",
+      "interactive",
+      "quiz game",
+      "guessing game",
+      "addictive games",
+      "tapping game",
+      "beat my score",
+      "game shorts",
+      "funny game",
+      "time killer",
+      "satisfying games",
+      "arcade games",
+      "quick game",
+      "short game",
+      "high score",
+      "reflex test",
+      "one minute game",
+      "game for android",
+      "game for iphone",
+      "phone game"
+    ],
+    "result": {
+      "score": 92,
+      "bestMult": 3,
+      "smashed": 19,
+      "taps": 27,
+      "counts": {
+        "count": 3,
+        "go": 1,
+        "whiff": 6,
+        "smashNormal": 18,
+        "tick": 10,
+        "frenzy": 2,
+        "combo": 5,
+        "smashGold": 1,
+        "gameOver": 1
+      }
+    },
+    "file": "antsmash_short_009_guess_score.mp4"
   }
 ]
