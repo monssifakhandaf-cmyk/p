@@ -1021,5 +1021,81 @@
       }
     },
     "file": "antsmash_short_009_guess_score.mp4"
+  },
+  {
+    "id": "neontower_short_004",
+    "createdAt": "2026-11-13T22:44:53.634Z",
+    "game": "neontower",
+    "kind": "short",
+    "concept": "fast_climb",
+    "seed": 317341635,
+    "time": 14,
+    "hookTpl": "How high in 15 seconds? ⏱️",
+    "hookStyle": "pill",
+    "bioTpl": "🏙️ Play Neon Tower FREE — link in bio 🔗",
+    "bioEndTpl": "🚀 Your turn! Link in bio 👆",
+    "ctaTpl": "Beat floor {score}? Play free — link in bio 👆",
+    "ctaStyle": "sticker",
+    "music": {
+      "style": "funk_groove",
+      "root": 40,
+      "tempo": 110,
+      "prog": 2,
+      "bassVar": 0,
+      "arpVar": 1,
+      "seed": 1303617956
+    },
+    "bestMode": "fresh",
+    "title": "Climbing to the Sky — Cloud layer! 🚀",
+    "titleTpl": "Climbing to the Sky — {zone}! 🚀",
+    "descIntro": "Think your timing is better than mine? Prove it 🧠",
+    "descTips": [
+      "🔥 Four perfects in a row make your floor wider again",
+      "☁️ Reach 12 floors for the Cloud layer",
+      "🛰️ Satellites appear around floor 40"
+    ],
+    "descQuestion": "Drop your best floor count below and challenge a friend 👇",
+    "bioLine": "🏙️ Play Neon Tower FREE — link in my bio 🔗",
+    "hashtags": [
+      "#HighScore",
+      "#BrowserGame",
+      "#ArcadeGame",
+      "#PerfectTiming"
+    ],
+    "tags": [
+      "speed run",
+      "tower challenge",
+      "stacking game",
+      "climbing game",
+      "time challenge",
+      "satisfying game",
+      "gameplay",
+      "gameplay shorts",
+      "gaming",
+      "games to play when bored",
+      "games to play on phone",
+      "boredom killer",
+      "reaction game",
+      "hand eye coordination",
+      "challenge",
+      "game challenge",
+      "score challenge",
+      "viral game",
+      "trending game",
+      "new game",
+      "neon game",
+      "relaxing game"
+    ],
+    "result": {
+      "score": 22,
+      "bestCombo": 22,
+      "perfects": 22,
+      "counts": {
+        "count": 1,
+        "ntPerfect": 22,
+        "ntZone": 1
+      }
+    },
+    "file": "neontower_short_004_fast_climb.mp4"
   }
 ]
